@@ -13,6 +13,11 @@
       "email": "deimort@hotmail.fr"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "Phabrique\\": "src/"
+    }
+  },
   "require": {},
   "require-dev": {
     "phpunit/phpunit": "^11"
