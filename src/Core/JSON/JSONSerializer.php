@@ -10,6 +10,10 @@ class JSONSerializer
 {
     public function serialize(mixed $obj): string
     {
+        if (is_null($obj)) {
+            return "null";
+        }
+
         if (is_string($obj)) {
             return '"' . $obj . '"';
         }
@@ -18,8 +22,16 @@ class JSONSerializer
             return $obj ? "true" : "false";
         }
 
-        if (is_int($obj) | is_bool($obj) | is_float($obj)) {
+        if (is_int($obj)) {
             return strval($obj);
+        }
+
+        if (is_float($obj)) {
+            if (is_nan($obj)) {
+                return "null";
+            } else {
+                return strval($obj);
+            }
         }
 
         if (is_array($obj)) {

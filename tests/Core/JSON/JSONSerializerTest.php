@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 final class Foo
 {
-    function __construct(private string $a, private int $b) {}
+    function __construct(private string|null $a, private int $b) {}
 }
 
 final class Bar
@@ -20,10 +20,10 @@ final class JSONSerializerTest extends TestCase
 {
     public function testSerializeArray(): void
     {
-        $arr = [1, 2, 3, 4];
+        $arr = [1, 2.258, 3, 4];
         $serializer = new JSONSerializer();
         $json = $serializer->serialize($arr);
-        $this->assertEquals("[1,2,3,4]", $json);
+        $this->assertEquals("[1,2.258,3,4]", $json);
     }
 
     public function testSerializingNestedArray(): void
@@ -83,5 +83,21 @@ final class JSONSerializerTest extends TestCase
         $serializer = new JSONSerializer();
         $json = $serializer->serialize($objs);
         $this->assertEquals('[{"a":"Hello","b":420},{"a":"world","b":69}]', $json);
+    }
+
+    public function testSerializeObjectWithNull()
+    {
+        $obj = new Foo(null, 69);
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($obj);
+        $this->assertEquals('{"a":null,"b":69}', $json);
+    }
+
+    public function testSerializeObjectWithNaN()
+    {
+        $definitelyNan = NAN;
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($definitelyNan);
+        $this->assertEquals('null', $json);
     }
 }
