@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Phabrique\Core;
-
+use Phabrique\Core\HttpError;
+use Phabrique\Core\HttpStatusCode;
+use Phabrique\Core\Request;
+use Phabrique\Core\RouteHandler;
+use Phabrique\Core\Router;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
