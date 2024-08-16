@@ -32,6 +32,8 @@ final class Ter
     ) {}
 }
 
+final class EmptyClass {}
+
 
 final class JSONSerializerTest extends TestCase
 {
@@ -136,5 +138,30 @@ final class JSONSerializerTest extends TestCase
         } catch (JSONException $e) {
             $this->assertEquals("Cannot make use of multiple '" . JSONField::class . "' attributes.", $e->getMessage());
         }
+    }
+
+    public function testSerializeEmptyArray() {
+        $arr = [];
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($arr);
+        $this->assertEquals("[]", $json); 
+    }
+
+    /*
+    public function testSerializeEmptyAssoc() {
+        // FIXME: unable to discriminate empty Assoc from empty Array
+        // IDEA: forceAssoc attribute in JSONField annotation
+        $arr = [];
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($arr);
+        $this->assertEquals("{}", $json); 
+    }
+    */
+
+    public function testSerializeEmptyObject() {
+        $obj = new EmptyClass();
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($obj);
+        $this->assertEquals("{}", $json); 
     }
 }

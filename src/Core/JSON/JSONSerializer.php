@@ -46,6 +46,10 @@ class JSONSerializer
 
     private function serializeArray(array $arr): string
     {
+        if (count($arr) == 0) {
+            return "[]";
+        }
+
         $result = '[';
         for ($i = 0; $i < count($arr); $i++) {
             $result .= $this->serialize($arr[$i]) . ",";
@@ -56,6 +60,10 @@ class JSONSerializer
 
     private function serializeAssoc(array $arr): string
     {
+        if (count($arr) == 0) {
+            return "{}";
+        }
+
         $result = "{";
         foreach ($arr as $k => $v) {
             $result .= $this->serialize($k) . ":" . $this->serialize($v) . ",";
@@ -89,6 +97,9 @@ class JSONSerializer
 
             $value = $this->serialize($prop->getValue($obj));
             $result .= "$name:$value,";
+        }
+        if (strlen($result) == 1) {
+            return "{}";
         }
         $result[strlen($result) - 1] = "}";
         return $result;
