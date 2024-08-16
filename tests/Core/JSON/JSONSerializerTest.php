@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Phabrique\Core\JSON\JSONException;
+use Phabrique\Core\JSON\JSONField;
 use Phabrique\Core\JSON\JSONSerializer;
 use PHPUnit\Framework\TestCase;
 
@@ -13,6 +15,21 @@ final class Foo
 final class Bar
 {
     function __construct(private Foo $foo) {}
+}
+
+final class Baz
+{
+    function __construct(
+        #[JsonField(fieldName: "name")] private string $userName,
+        #[JsonField(ignore: true)] private string $password,
+    ) {}
+}
+
+final class Ter
+{
+    function __construct(
+        #[JsonField(fieldName: "name")] #[JsonField(ignore: true)] private string $userName
+    ) {}
 }
 
 
@@ -99,5 +116,25 @@ final class JSONSerializerTest extends TestCase
         $serializer = new JSONSerializer();
         $json = $serializer->serialize($definitelyNan);
         $this->assertEquals('null', $json);
+    }
+
+    public function testSerializeAnnotatedObject()
+    {
+        $obj = new Baz("pol", "1234");
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($obj);
+        $this->assertEquals('{"name":"pol"}', $json);
+    }
+
+    public function testRejectMultipleJsonFieldAnotation()
+    {
+        try {
+            $obj = new Ter("dylan");
+            $serializer = new JSONSerializer();
+            $serializer->serialize($obj);
+            $this->fail("Should have thrown JSONException");
+        } catch (JSONException $e) {
+            $this->assertEquals("Cannot make use of multiple '" . JSONField::class . "' attributes.", $e->getMessage());
+        }
     }
 }

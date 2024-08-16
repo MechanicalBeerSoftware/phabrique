@@ -70,7 +70,25 @@ class JSONSerializer
         $reflection = new ReflectionObject($obj);
         $props = $reflection->getProperties();
         foreach ($props as $prop) {
-            $result .= $this->serialize($prop->getName()) . ":" . $this->serialize($prop->getValue($obj)) . ",";
+            $name = $this->serialize($prop->getName());
+
+            $attributes = $prop->getAttributes(JsonField::class);
+            if (count($attributes) > 1) {
+                throw new JSONException("Cannot make use of multiple '" . JSONField::class . "' attributes.");
+            }
+
+            if (count($attributes) == 1) {
+                $attrInstance = $attributes[0]->newInstance();
+                if ($attrInstance->ignore) {
+                    continue;
+                }
+                if (! is_null($attrInstance->fieldName)) {
+                    $name = '"' . $attrInstance->fieldName . '"';
+                }
+            }
+
+            $value = $this->serialize($prop->getValue($obj));
+            $result .= "$name:$value,";
         }
         $result[strlen($result) - 1] = "}";
         return $result;
