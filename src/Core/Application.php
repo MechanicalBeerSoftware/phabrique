@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Phabrique\Core;
+
 use Exception;
 use Error;
 
@@ -28,6 +29,9 @@ class Application
         }
 
         http_response_code($response->getStatus()->value);
+        foreach ($response->getHeaders() as $header => $value) {
+            header("$header: $value");
+        }
         echo $response->getBody();
     }
 }
