@@ -4,16 +4,23 @@ namespace Phabrique\Core;
 
 class ServerRequest implements Request {
 
+
+    private function __construct(private readonly array $query_params, private readonly string $path, private readonly string $method, private readonly array $formData) {
+
+    }
+
     public static function parse() : Request { 
         return new ServerRequest(
             $_GET,
             parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH),
-            strtolower($_SERVER["REQUEST_METHOD"])
+            strtolower($_SERVER["REQUEST_METHOD"]),
+            $_POST
         );
     }
 
-    private function __construct(private readonly array $query_params, private readonly string $path, private readonly string $method) {
-
+    public function getFormData(): array
+    {
+        return $this->formData;
     }
 
     public function getQueryParameters(): array
