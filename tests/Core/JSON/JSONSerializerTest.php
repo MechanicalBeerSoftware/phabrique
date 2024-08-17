@@ -32,6 +32,11 @@ final class Ter
     ) {}
 }
 
+final class Fiz
+{
+    public function __construct(private mixed $func) {}
+}
+
 final class EmptyClass {}
 
 
@@ -140,11 +145,12 @@ final class JSONSerializerTest extends TestCase
         }
     }
 
-    public function testSerializeEmptyArray() {
+    public function testSerializeEmptyArray()
+    {
         $arr = [];
         $serializer = new JSONSerializer();
         $json = $serializer->serialize($arr);
-        $this->assertEquals("[]", $json); 
+        $this->assertEquals("[]", $json);
     }
 
     /*
@@ -158,10 +164,43 @@ final class JSONSerializerTest extends TestCase
     }
     */
 
-    public function testSerializeEmptyObject() {
+    public function testSerializeEmptyObject()
+    {
         $obj = new EmptyClass();
         $serializer = new JSONSerializer();
         $json = $serializer->serialize($obj);
-        $this->assertEquals("{}", $json); 
+        $this->assertEquals("{}", $json);
+    }
+
+    public function testSerializeCallable()
+    {
+        $func = fn() => "hello";
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($func);
+        $this->assertEquals("{}", $json);
+    }
+
+    public function testSerializeObjectWithCallableProperty()
+    {
+        $obj = new Fiz(fn() => "world");
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($obj);
+        $this->assertEquals('{"func":{}}', $json);
+    }
+
+    public function testSerializeArrayWithCallableProperty()
+    {
+        $arr = [fn() => "world"];
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($arr);
+        $this->assertEquals('[{}]', $json);
+    }
+
+    public function testSerializeAssocWithCallableProperty()
+    {
+        $assoc = ["func" => fn() => "world"];
+        $serializer = new JSONSerializer();
+        $json = $serializer->serialize($assoc);
+        $this->assertEquals('{"func":{}}', $json);
     }
 }
