@@ -79,4 +79,21 @@ class RouteMatcher
         }
         return $this->lastMatch;
     }
+
+    public function isEquivalentTo(RouteMatcher $other): bool {
+        if (count($other->parts) != count($this->parts)) {
+            return false;
+        }
+        for($i = 0; $i < count($this->parts); $i++) {
+            if ($this->parts[$i][0] == ':') {
+                if ($other->parts[$i][0] != ':') {
+                    return false;
+                }
+            }
+            else if ($this->parts[$i] != $other->parts[$i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -2,6 +2,8 @@
 
 namespace Phabrique\Core;
 
+use Exception;
+
 class Router
 {
     /**
@@ -11,13 +13,20 @@ class Router
 
     private function addRoute(string $method, string $path, RouteHandler $handler)
     {
+        $matcher = RouteMatcher::compile($path);
         $route = new Route(
-            RouteMatcher::compile($path),
+            $matcher,
             $handler,
             $method
         );
+
+        foreach ($this->routes as $existing) {
+            if ($existing->getMethod() == $method && $existing->getMatcher()->isEquivalentTo($matcher)) {
+                throw new Exception("Route already exists");
+            }
+        }
+
         array_push($this->routes, $route);
-        // TODO: enforce no similar registered
         // TODO: sort
     }
 

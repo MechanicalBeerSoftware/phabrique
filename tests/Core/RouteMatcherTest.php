@@ -102,4 +102,36 @@ class RouteMatcherTest extends TestCase
             $this->assertEquals("Invalid path 'items 52'", $e->getMessage());
         }
     }
+
+    function testKnowIfEquivalentWithoutParams()
+    {
+        $m1 = RouteMatcher::compile("/items");
+        $m2 = RouteMatcher::compile("/items");
+        $this->assertTrue($m1->isEquivalentTo($m2));
+        $this->assertTrue($m2->isEquivalentTo($m1));
+    }
+
+    function testKnowIfEquivalentWithParams()
+    {
+        $m1 = RouteMatcher::compile("/items/:id");
+        $m2 = RouteMatcher::compile("/items/:itemId");
+        $this->assertTrue($m1->isEquivalentTo($m2));
+        $this->assertTrue($m2->isEquivalentTo($m1));
+    }
+
+    function testKnowIfNotEquivalentWithoutParams()
+    {
+        $m1 = RouteMatcher::compile("/peers");
+        $m2 = RouteMatcher::compile("/apples");
+        $this->assertFalse($m1->isEquivalentTo($m2));
+        $this->assertFalse($m2->isEquivalentTo($m1));
+    }
+
+    function testKnowIfNotEquivalentWithParams()
+    {
+        $m1 = RouteMatcher::compile("/items/:id");
+        $m2 = RouteMatcher::compile("/items/new");
+        $this->assertFalse($m1->isEquivalentTo($m2));
+        $this->assertFalse($m2->isEquivalentTo($m1));
+    }
 }

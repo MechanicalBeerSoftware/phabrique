@@ -101,4 +101,30 @@ final class RouterTest extends TestCase
 
         $router->direct($requestMock);
     }
+
+    public function testThrowOnDuplicateRouteWithSameMethod()
+    {
+        $router = new Router();
+        $router->get("/items", $this->createMock(RouteHandler::class));
+
+        try {
+            $router->get("/items", $this->createMock(RouteHandler::class));
+            $this->fail("should have thrown");
+        } catch (Exception $e) {
+            $this->assertEquals("Route already exists", $e->getMessage());
+        }
+    }
+
+    public function testThrowOnDuplicateTemplateRouteWithSameMethod()
+    {
+        $router = new Router();
+        $router->get("/items/:id", $this->createMock(RouteHandler::class));
+
+        try {
+            $router->get("/items/:foobar", $this->createMock(RouteHandler::class));
+            $this->fail("should have thrown");
+        } catch (Exception $e) {
+            $this->assertEquals("Route already exists", $e->getMessage());
+        }
+    }
 }
