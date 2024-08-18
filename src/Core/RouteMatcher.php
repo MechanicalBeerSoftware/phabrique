@@ -7,8 +7,8 @@ namespace Phabrique\Core;
 use Exception;
 
 
-const TEMPLATE_PATTERN = "/^(\/:?[a-zA-Z_-][0-9a-zA-Z_-]*)+$/";
-const PATH_PATTERN = "/^(\/[0-9a-zA-Z_-]+)+$/"; // Same but without ':'
+const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_-][0-9a-zA-Z_-]*)?)+$/";
+const PATH_PATTERN = "/^(\/[0-9a-zA-Z_-]*)+$/"; // Same but without ':'
 
 class RouteMatcher
 {
@@ -19,7 +19,10 @@ class RouteMatcher
         if (!preg_match(TEMPLATE_PATTERN, $template)) {
             throw new Exception("Invalid template '$template'");
         }
-        $parts = array_slice(explode("/", $template), 1);
+        $parts = explode("/", substr($template, 1));
+        if (count($parts) == 1 && strlen($parts[0]) == 0) {
+            $parts = [];
+        }
 
         // Assert no multiple keys
         foreach ($parts as $part) {
@@ -45,7 +48,11 @@ class RouteMatcher
             throw new Exception("Invalid path '$path'");
         }
 
-        $pathParts = array_slice(explode("/", $path), 1);
+        $pathParts = explode("/", substr($path, 1));
+        if (count($pathParts) == 1 && strlen($pathParts[0]) == 0) {
+            $pathParts = [];
+        }
+
         if (count($pathParts) != count($this->parts)) {
             return false;
         }

@@ -30,7 +30,8 @@ final class RouterTest extends TestCase
         $router->direct($requestMock);
     }
 
-    public function testHandlerCalledWithPostMethod(): void {
+    public function testHandlerCalledWithPostMethod(): void
+    {
         /** @var Request&MockObject */
         $requestMock = $this->createMock(Request::class);
         $requestMock->method("getPath")->willReturn("/");
@@ -44,7 +45,6 @@ final class RouterTest extends TestCase
 
         $router->post("/", $routeHandler);
         $router->direct($requestMock);
-
     }
 
     public function testErrorHandlerCalledWhenRequestPathNotFound()
@@ -84,5 +84,21 @@ final class RouterTest extends TestCase
             $this->assertInstanceOf(HttpError::class, $e);
             $this->assertEquals(HttpStatusCode::ERR_METHOD_NOT_ALLOWED, $e->getStatusCode());
         }
-    } 
+    }
+
+    public function testAppendPathParamsToRequest()
+    {
+        /** @var Request&MockObject */
+        $requestMock = $this->createMock(Request::class);
+        $requestMock->method("getPath")->willReturn("/items/69");
+        $requestMock->method("getMethod")->willReturn("get");
+        $requestMock->expects($this->once())->method("setPathParameters");
+
+        $routeHandlerMock = $this->createMock(RouteHandler::class);
+
+        $router = new Router();
+        $router->get("/items/:id", $routeHandlerMock);
+
+        $router->direct($requestMock);
+    }
 }

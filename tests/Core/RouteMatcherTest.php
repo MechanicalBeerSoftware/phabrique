@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Phabrique\Core\RouteMatcher;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class RouteMatcherTest extends TestCase
 {
@@ -51,6 +52,24 @@ class RouteMatcherTest extends TestCase
         } catch (Exception $e) {
             $this->assertEquals("Cannot extract path params from unmatched path", $e->getMessage());
         }
+    }
+
+    static function validTemplatesProvider()
+    {
+        return [
+            ["/"],
+            ["/items"],
+            ["/items/new"],
+            ["/items/:id"],
+            ["/items/:id/price"],
+        ];
+    }
+
+    #[DataProvider("validTemplatesProvider")]
+    function testValidTemplateCompiles($template)
+    {
+        $m = RouteMatcher::compile($template);
+        $this->assertNotNull($m);
     }
 
     function testInvalidTemplateThrows()
