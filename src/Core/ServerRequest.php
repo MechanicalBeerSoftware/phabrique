@@ -4,10 +4,9 @@ namespace Phabrique\Core;
 
 class ServerRequest implements Request {
 
-
-    private function __construct(private readonly array $query_params, private readonly string $path, private readonly string $method, private readonly array $formData) {
-
-    }
+    private $pathParameters = [];
+    
+    private function __construct(private readonly array $query_params, private readonly string $path, private readonly string $method, private readonly array $formData) {}
 
     public static function parse() : Request { 
         return new ServerRequest(
@@ -26,6 +25,16 @@ class ServerRequest implements Request {
     public function getQueryParameters(): array
     {
         return $this->query_params;
+    }
+
+    public function getPathParameters(): array
+    {
+        return $this->pathParameters;
+    }
+
+    public function setPathParameters(array $pathParameters): void
+    {
+        $this->pathParameters = $pathParameters;
     }
 
     public function getPath(): string
