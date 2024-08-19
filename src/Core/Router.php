@@ -20,6 +20,7 @@ class Router
             $method
         );
 
+        // If a similar route already exists, throw
         foreach ($this->routes as $existing) {
             if ($existing->getMethod() == $method && $existing->getMatcher()->isEquivalentTo($matcher)) {
                 throw new Exception("Route already exists");
@@ -27,7 +28,11 @@ class Router
         }
 
         array_push($this->routes, $route);
-        // TODO: sort
+
+        // Sort routes by priority descending
+        usort($this->routes, function (Route $r1, Route $r2) {
+            return -RouteMatcher::comparePriority($r1->getMatcher(), $r2->getMatcher());
+        });
     }
 
     public function get(string $path, RouteHandler $handler)

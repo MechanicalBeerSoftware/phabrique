@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Phabrique\Core\HttpError;
 use Phabrique\Core\HttpStatusCode;
 use Phabrique\Core\Request;
+use Phabrique\Core\Response;
 use Phabrique\Core\RouteHandler;
 use Phabrique\Core\Router;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -12,6 +13,12 @@ use PHPUnit\Framework\TestCase;
 
 final class RouterTest extends TestCase
 {
+
+    function setUp(): void
+    {
+        # Turn on error reporting
+        error_reporting(E_ALL);
+    }
 
     public function testHandlerCalledWithExistingPathAndMethod(): void
     {
@@ -126,5 +133,31 @@ final class RouterTest extends TestCase
         } catch (Exception $e) {
             $this->assertEquals("Route already exists", $e->getMessage());
         }
+    }
+
+    public function testPrioritizeHigherPriorityRoutes()
+    {
+        $response = $this->createMock(Response::class);
+
+        /** @var RouteHandler&MockObject */
+        $handler = $this->createMock(RouteHandler::class);
+        $handler->method("handle")->willReturn($response);
+        $handler->expects($this->once())->method("handle");
+
+        /** @var RouteHandler&MockObject */
+        $badHandler = $this->createMock(RouteHandler::class);
+        $badHandler->method("handle")->willReturn($response);
+        $badHandler->expects($this->never())->method("handle");
+
+        $router = new Router();
+        $router->get("/items/first", $handler);
+        $router->get("/items/:id", $badHandler);
+
+        /** @var Request&MockObject */
+        $request = $this->createMock(Request::class);
+        $request->method("getPath")->willReturn("/items/first");
+        $request->method("getMethod")->willReturn("get");
+
+        $router->direct($request);
     }
 }

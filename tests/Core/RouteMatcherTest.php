@@ -134,4 +134,33 @@ class RouteMatcherTest extends TestCase
         $this->assertFalse($m1->isEquivalentTo($m2));
         $this->assertFalse($m2->isEquivalentTo($m1));
     }
+
+    static function routesPriorityProvider()
+    {
+        return [
+            ["/", "/", "="],
+            ["/items/first/price", "/items/:id/price", ">"],
+            ["/items/:id/provider/last", "/items/first/provider/:id", "<"],
+            ["/items/first/provider/:id", "/items/:id/provider/last", ">"],
+        ];
+    }
+
+    #[DataProvider("routesPriorityProvider")]
+    function testPriorityComparison(string $m1, string $m2, string $cmp)
+    {
+        $rm1 = RouteMatcher::compile($m1);
+        $rm2 = RouteMatcher::compile($m2);
+        switch ($cmp) {
+            case "=":
+                $this->assertTrue(RouteMatcher::comparePriority($rm1, $rm2) == 0);
+                break;
+            case ">":
+                $this->assertTrue(RouteMatcher::comparePriority($rm1, $rm2) > 0);
+                $this->assertTrue(RouteMatcher::comparePriority($rm2, $rm1) < 0);
+                break;
+            case "<":
+                $this->assertTrue(RouteMatcher::comparePriority($rm1, $rm2) < 0);
+                $this->assertTrue(RouteMatcher::comparePriority($rm2, $rm1) > 0);
+        }
+    }
 }

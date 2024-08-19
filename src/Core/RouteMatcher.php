@@ -8,7 +8,7 @@ use Exception;
 
 
 const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_-][0-9a-zA-Z_-]*)?)+$/";
-const PATH_PATTERN = "/^(\/[0-9a-zA-Z_-]*)+$/"; // Same but without ':'
+const PATH_PATTERN = "/^(\/[0-9a-zA-Z_-]*)+$/";
 
 class RouteMatcher
 {
@@ -80,20 +80,25 @@ class RouteMatcher
         return $this->lastMatch;
     }
 
-    public function isEquivalentTo(RouteMatcher $other): bool {
+    public function isEquivalentTo(RouteMatcher $other): bool
+    {
         if (count($other->parts) != count($this->parts)) {
             return false;
         }
-        for($i = 0; $i < count($this->parts); $i++) {
+        for ($i = 0; $i < count($this->parts); $i++) {
             if ($this->parts[$i][0] == ':') {
                 if ($other->parts[$i][0] != ':') {
                     return false;
                 }
-            }
-            else if ($this->parts[$i] != $other->parts[$i]) {
+            } else if ($this->parts[$i] != $other->parts[$i]) {
                 return false;
             }
         }
         return true;
+    }
+
+    public static function comparePriority(RouteMatcher $a, RouteMatcher $b): int
+    {
+        return strcmp(join("/", $a->parts), join("/", $b->parts));
     }
 }
