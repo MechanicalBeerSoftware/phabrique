@@ -58,5 +58,30 @@ final class ServerRequestTest extends TestCase
 
         $this->assertTrue(array_key_exists("param1", $request->getFormData()));
         $this->assertEquals("value1", $request->getFormData()["param1"]);
+        $this->assertFalse(array_key_exists("param2", $request->getQueryParameters()));
+    }
+
+    public function testRequestPathParamsAreEmptyOnCreation()
+    {
+        $_SERVER["REQUEST_URI"] = "/endpoint.php";
+        $_SERVER["REQUEST_METHOD"] = "GET";
+
+        $_GET = ["param1" => "value1"];
+        $request = ServerRequest::parse();
+
+        $this->assertEmpty($request->getPathParameters());
+    }
+
+    public function testRequestPathParamsCanBeSet()
+    {
+        $_SERVER["REQUEST_URI"] = "/endpoint.php";
+        $_SERVER["REQUEST_METHOD"] = "GET";
+
+        $_GET = ["param1" => "value1"];
+        $request = ServerRequest::parse();
+
+        $request->setPathParameters(["id" => 69]);
+        $this->assertEquals(count($request->getPathParameters()), 1);
+        $this->assertEquals(69, $request->getPathParameters()["id"]);
     }
 }
