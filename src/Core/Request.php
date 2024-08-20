@@ -10,4 +10,5 @@ interface Request
     public function setPathParameters(array $pathParameters): void;
     public function getPath(): string;
     public function getMethod(): string;
+    public function getHeaders(): array;
 }
