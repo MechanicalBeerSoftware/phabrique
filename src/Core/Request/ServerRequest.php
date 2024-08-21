@@ -1,6 +1,6 @@
 <?php
 
-namespace Phabrique\Core;
+namespace Phabrique\Core\Request;
 
 class ServerRequest implements Request
 {

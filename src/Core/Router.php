@@ -1,7 +1,7 @@
 <?php
 
 namespace Phabrique\Core;
-
+use Phabrique\Core\Request\Request;
 use Exception;
 
 class Router

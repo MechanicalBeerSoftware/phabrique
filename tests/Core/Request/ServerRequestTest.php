@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Phabrique\Core\ServerRequest;
+use Phabrique\Core\Request\ServerRequest;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\TestCase;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Phabrique\Core\HttpError;
 use Phabrique\Core\HttpStatusCode;
-use Phabrique\Core\Request;
+use Phabrique\Core\Request\Request;
 use Phabrique\Core\Response;
 use Phabrique\Core\RouteHandler;
 use Phabrique\Core\Router;
