@@ -1,39 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phabrique\Core\Request;
 
 class ServerRequest implements Request
 {
-
     private $pathParameters = [];
 
-    private function __construct(
+    public function __construct(
         private readonly array $query_params,
         private readonly string $path,
-        private readonly string $method,
-        private readonly array $formData,
+        private readonly RequestMethod $method,
+        private readonly string|array $body,
         private readonly array $headers,
     ) {}
 
-    public static function parse(): Request
-    {
-        $headers = [];
-        if (function_exists("getallheaders")) {
-            $headers = getallheaders();
-        }
-        return new ServerRequest(
-            $_GET,
-            parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH),
-            strtolower($_SERVER["REQUEST_METHOD"]),
-            $_POST,
-            $headers,
-        );
-    }
-
-    public function getFormData(): array
-    {
-        return $this->formData;
-    }
 
     public function getQueryParameters(): array
     {
@@ -55,7 +37,7 @@ class ServerRequest implements Request
         return $this->path;
     }
 
-    public function getMethod(): string
+    public function getMethod(): RequestMethod
     {
         return $this->method;
     }
@@ -63,5 +45,10 @@ class ServerRequest implements Request
     public function getHeaders(): array
     {
         return $this->headers;
+    }
+
+    public function getBody(): array|string
+    {
+        return $this->body;
     }
 }
