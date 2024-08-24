@@ -58,7 +58,7 @@ class HttpRequestParserTest extends TestCase
     public function testParsedRequestContainsFormParam()
     {
         $_SERVER["REQUEST_URI"] = "/endpoint.php";
-        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_METHOD"] = "POST";
         $_POST["param1"] = "value1";
 
         $requestParser = new HttpRequestParser();

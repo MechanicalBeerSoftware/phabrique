@@ -6,13 +6,19 @@ class HttpRequestParser implements RequestParser
 {
     public function parseIncomingRequest(): Request
     {
+        $method = $this->parseRequestMethod();
         $headers = $this->parseHeaders();
+        $body = "";
+        // GET doesn't have a body
+        if ($method !== RequestMethod::Get) {
+            $body = $this->parseBody($headers);
+        }
 
         return new ServerRequest(
             $this->parseQueryParams(),
             $this->parsePath(),
-            $this->parseRequestMethod(),
-            $this->parseBody($headers),
+            $method,
+            $body,
             $headers,
         );
     }
@@ -43,6 +49,23 @@ class HttpRequestParser implements RequestParser
 
     private function parseBody(array $headers): string|array
     {
+        // Handle special case for html forms
+        if (count($_POST) > 0) {
+            return $_POST;
+        }
+
+        // TODO: inject via dep injection
+        $bodyParserFactory = new BodyParserFactory();
+
+        $bodyParser = $bodyParserFactory->getParserForContentType($headers["Content-Type"]);
+
+        $body = file_get_contents('php://input');
+
+        if (is_null($bodyParser)) {
+            // return raw body
+            return $body;
+        }
+        return $bodyParser->parse($body);
         return $_POST;
     }
 }
