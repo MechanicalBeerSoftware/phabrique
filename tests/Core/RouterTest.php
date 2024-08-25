@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 use Phabrique\Core\HttpError;
 use Phabrique\Core\HttpStatusCode;
-use Phabrique\Core\Request;
+use Phabrique\Core\Request\Request;
+use Phabrique\Core\Request\RequestMethod;
 use Phabrique\Core\Response;
 use Phabrique\Core\RouteHandler;
 use Phabrique\Core\Router;
@@ -25,7 +26,7 @@ final class RouterTest extends TestCase
         /** @var Request&MockObject */
         $requestMock = $this->createMock(Request::class);
         $requestMock->method("getPath")->willReturn("/");
-        $requestMock->method("getMethod")->willReturn("get");
+        $requestMock->method("getMethod")->willReturn(RequestMethod::Get);
 
         $router = new Router();
 
@@ -42,7 +43,7 @@ final class RouterTest extends TestCase
         /** @var Request&MockObject */
         $requestMock = $this->createMock(Request::class);
         $requestMock->method("getPath")->willReturn("/");
-        $requestMock->method("getMethod")->willReturn("post");
+        $requestMock->method("getMethod")->willReturn(RequestMethod::Post);
 
         $router = new Router();
 
@@ -76,7 +77,7 @@ final class RouterTest extends TestCase
         /** @var Request&MockObject */
         $requestMock = $this->createMock(Request::class);
         $requestMock->method("getPath")->willReturn("/");
-        $requestMock->method("getMethod")->willReturn("post");
+        $requestMock->method("getMethod")->willReturn(RequestMethod::Post);
 
         /** @var RouteHandler&MockObject */
         $routeHandlerMock = $this->createMock(RouteHandler::class);
@@ -98,7 +99,7 @@ final class RouterTest extends TestCase
         /** @var Request&MockObject */
         $requestMock = $this->createMock(Request::class);
         $requestMock->method("getPath")->willReturn("/items/69");
-        $requestMock->method("getMethod")->willReturn("get");
+        $requestMock->method("getMethod")->willReturn(RequestMethod::Get);
         $requestMock->expects($this->once())->method("setPathParameters");
 
         $routeHandlerMock = $this->createMock(RouteHandler::class);
@@ -156,7 +157,7 @@ final class RouterTest extends TestCase
         /** @var Request&MockObject */
         $request = $this->createMock(Request::class);
         $request->method("getPath")->willReturn("/items/first");
-        $request->method("getMethod")->willReturn("get");
+        $request->method("getMethod")->willReturn(RequestMethod::Get);
 
         $router->direct($request);
     }

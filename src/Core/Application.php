@@ -6,6 +6,7 @@ namespace Phabrique\Core;
 
 use Exception;
 use Error;
+use Phabrique\Core\Request\Request;
 
 class Application
 {

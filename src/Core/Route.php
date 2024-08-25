@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Phabrique\Core;
 
+use Phabrique\Core\Request\RequestMethod;
+
 class Route
 {
     public function __construct(
         private readonly RouteMatcher $matcher,
         private readonly RouteHandler $handler,
-        private readonly string $method
+        private readonly RequestMethod $method
     ) {}
 
     public function getMatcher(): RouteMatcher
@@ -22,7 +24,7 @@ class Route
         return $this->handler;
     }
 
-    public function getMethod(): string
+    public function getMethod(): RequestMethod
     {
         return $this->method;
     }
