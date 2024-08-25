@@ -9,14 +9,14 @@ use Phabrique\Core\Request\RequestMethod;
 class Router
 {
     /**
-     * @var Route[]
+     * @var RouteDefinition[]
      */
     private array $routes = [];
 
-    private function addRoute(RequestMethod $method, string $path, RouteHandler $handler)
+    public function addRoute(RequestMethod $method, string $path, RouteHandler $handler)
     {
         $matcher = RouteMatcher::compile($path);
-        $route = new Route(
+        $route = new RouteDefinition(
             $matcher,
             $handler,
             $method
@@ -32,7 +32,7 @@ class Router
         array_push($this->routes, $route);
 
         // Sort routes by priority descending
-        usort($this->routes, function (Route $r1, Route $r2) {
+        usort($this->routes, function (RouteDefinition $r1, RouteDefinition $r2) {
             return -RouteMatcher::comparePriority($r1->getMatcher(), $r2->getMatcher());
         });
     }
