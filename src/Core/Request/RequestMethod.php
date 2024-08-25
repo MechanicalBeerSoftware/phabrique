@@ -14,6 +14,9 @@ enum RequestMethod
     case Patch;
     case Delete;
     case Options;
+    case Connect;
+    case Head;
+    case Trace;
 
 
     public static function fromString(string $method): RequestMethod
@@ -25,6 +28,9 @@ enum RequestMethod
             "patch" => RequestMethod::Patch,
             "delete" => RequestMethod::Delete,
             "options" => RequestMethod::Options,
+            "connect" => RequestMethod::Connect,
+            "trace" => RequestMethod::Trace,
+            "head" => RequestMethod::Head,
             default => throw new Exception("'$method' is not a valid request method")
         };
     }

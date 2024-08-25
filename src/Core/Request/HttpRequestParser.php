@@ -66,6 +66,5 @@ class HttpRequestParser implements RequestParser
             return $body;
         }
         return $bodyParser->parse($body);
-        return $_POST;
     }
 }

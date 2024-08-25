@@ -16,6 +16,9 @@ class RequestMethodTest extends TestCase
         $this->assertEquals(RequestMethod::Patch, RequestMethod::fromString("patch"));
         $this->assertEquals(RequestMethod::Options, RequestMethod::fromString("options"));
         $this->assertEquals(RequestMethod::Delete, RequestMethod::fromString("delete"));
+        $this->assertEquals(RequestMethod::Connect, RequestMethod::fromString("connect"));
+        $this->assertEquals(RequestMethod::Head, RequestMethod::fromString("head"));
+        $this->assertEquals(RequestMethod::Trace, RequestMethod::fromString("trace"));
     }
 
     function testParseFromStringIgnoreCase()
