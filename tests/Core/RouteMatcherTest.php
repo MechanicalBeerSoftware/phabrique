@@ -8,40 +8,39 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 class RouteMatcherTest extends TestCase
 {
-
-    function setUp(): void
+    public function setUp(): void
     {
         # Turn on error reporting
         error_reporting(E_ALL);
     }
 
-    function testRouteMatcherWithoutParamsMatchesCorrectPath()
+    public function testRouteMatcherWithoutParamsMatchesCorrectPath()
     {
         $m = RouteMatcher::compile("/my/path");
         $this->assertTrue($m->matches("/my/path"));
     }
 
-    function testRouteMatcherWithoutParamsDoesntMatchIncorrectPath()
+    public function testRouteMatcherWithoutParamsDoesntMatchIncorrectPath()
     {
         $m = RouteMatcher::compile("/my/path");
         $this->assertFalse($m->matches("/not/my/path"));
     }
 
-    function testSimpleRouteMatcherReturnsEmptyPathParams()
+    public function testSimpleRouteMatcherReturnsEmptyPathParams()
     {
         $m = RouteMatcher::compile("/my/path");
         $this->assertTrue($m->matches("/my/path"));
         $this->assertEmpty($m->extract());
     }
 
-    function testRouteMatcherParsesPathParams()
+    public function testRouteMatcherParsesPathParams()
     {
         $m = RouteMatcher::compile("/items/:id");
         $m->matches("/items/69");
         $this->assertEquals(["id" => "69"], $m->extract());
     }
 
-    function testCannotExtractIfDidntMatch()
+    public function testCannotExtractIfDidntMatch()
     {
         $m = RouteMatcher::compile("/items/:id");
         $m->matches("/other-items/69");
@@ -54,7 +53,7 @@ class RouteMatcherTest extends TestCase
         }
     }
 
-    static function validTemplatesProvider()
+    public static function validTemplatesProvider()
     {
         return [
             ["/"],
@@ -66,13 +65,13 @@ class RouteMatcherTest extends TestCase
     }
 
     #[DataProvider("validTemplatesProvider")]
-    function testValidTemplateCompiles($template)
+    public function testValidTemplateCompiles($template)
     {
         $m = RouteMatcher::compile($template);
         $this->assertNotNull($m);
     }
 
-    function testInvalidTemplateThrows()
+    public function testInvalidTemplateThrows()
     {
         try {
             RouteMatcher::compile("invalid");
@@ -82,7 +81,7 @@ class RouteMatcherTest extends TestCase
         }
     }
 
-    function testTemplateWithMultipleSameKeyThrows()
+    public function testTemplateWithMultipleSameKeyThrows()
     {
         try {
             RouteMatcher::compile("/users/:id/friends/:id");
@@ -92,7 +91,7 @@ class RouteMatcherTest extends TestCase
         }
     }
 
-    function testInvalidPathThrows()
+    public function testInvalidPathThrows()
     {
         try {
             $m = RouteMatcher::compile("/items/:id/price");
@@ -103,7 +102,7 @@ class RouteMatcherTest extends TestCase
         }
     }
 
-    function testKnowIfEquivalentWithoutParams()
+    public function testKnowIfEquivalentWithoutParams()
     {
         $m1 = RouteMatcher::compile("/items");
         $m2 = RouteMatcher::compile("/items");
@@ -111,7 +110,7 @@ class RouteMatcherTest extends TestCase
         $this->assertTrue($m2->isEquivalentTo($m1));
     }
 
-    function testKnowIfEquivalentWithParams()
+    public function testKnowIfEquivalentWithParams()
     {
         $m1 = RouteMatcher::compile("/items/:id");
         $m2 = RouteMatcher::compile("/items/:itemId");
@@ -119,7 +118,15 @@ class RouteMatcherTest extends TestCase
         $this->assertTrue($m2->isEquivalentTo($m1));
     }
 
-    function testKnowIfNotEquivalentWithoutParams()
+    public function testKnowIfEquivalentWithWildcard()
+    {
+        $m1 = RouteMatcher::compile("/items/*path");
+        $m2 = RouteMatcher::compile("/items/*anotherPath");
+        $this->assertTrue($m1->isEquivalentTo($m2));
+        $this->assertTrue($m2->isEquivalentTo($m1));
+    }
+
+    public function testKnowIfNotEquivalentWithoutParams()
     {
         $m1 = RouteMatcher::compile("/peers");
         $m2 = RouteMatcher::compile("/apples");
@@ -127,7 +134,7 @@ class RouteMatcherTest extends TestCase
         $this->assertFalse($m2->isEquivalentTo($m1));
     }
 
-    function testKnowIfNotEquivalentWithParams()
+    public function testKnowIfNotEquivalentWithParams()
     {
         $m1 = RouteMatcher::compile("/items/:id");
         $m2 = RouteMatcher::compile("/items/new");
@@ -135,7 +142,60 @@ class RouteMatcherTest extends TestCase
         $this->assertFalse($m2->isEquivalentTo($m1));
     }
 
-    static function routesPriorityProvider()
+    public function testKnowIfNotEquivalentWithWildcard()
+    {
+        $m1 = RouteMatcher::compile("/items/*path");
+        $m2 = RouteMatcher::compile("/items/new");
+        $this->assertFalse($m1->isEquivalentTo($m2));
+        $this->assertFalse($m2->isEquivalentTo($m1));
+    }
+
+    public function testStaticRouteReturnsSimplePath()
+    {
+        $m = RouteMatcher::compile("/data/*path");
+        $m->matches("/data/myimage.png");
+        $this->assertEquals(["path" => "myimage.png"], $m->extract());
+    }
+
+    public function testWildCardRetrievesAllTheRemainingPath()
+    {
+        $m = RouteMatcher::compile("/data/*path");
+        $m->matches("/data/user/img/myimage.png");
+        $this->assertEquals(["path" => "user/img/myimage.png"], $m->extract());
+    }
+
+    public function testMatcherRetrievesPathParamsAndWildcard()
+    {
+
+        $m = RouteMatcher::compile("/user/:id/*path");
+        $m->matches("/user/1/img/myimage.png");
+        $this->assertEquals(["id" => "1", "path" => "img/myimage.png"], $m->extract());
+    }
+
+    public function testStaticRouteWithMultipleWildcardsIsInvalid()
+    {
+        $template = "/data/*foo/bar/*baz";
+        try {
+            $m = RouteMatcher::compile($template);
+            $this->fail("RouteMatcher::compile was suppose to throw");
+        } catch (Exception $err) {
+            $this->assertEquals("Invalid template '$template'", $err->getMessage());
+        }
+    }
+
+    public function testTemplateInvalidWhenWildcardIsNotTheLastElement()
+    {
+        $template = "/data/*foo/bar";
+
+        try {
+            $m = RouteMatcher::compile($template);
+            $this->fail("RouteMatcher::compile was suppose to throw");
+        } catch (Exception $err) {
+            $this->assertEquals("Invalid template '$template'", $err->getMessage());
+        }
+    }
+
+    public static function routesPriorityProvider()
     {
         return [
             ["/", "/", "="],
@@ -146,7 +206,7 @@ class RouteMatcherTest extends TestCase
     }
 
     #[DataProvider("routesPriorityProvider")]
-    function testPriorityComparison(string $m1, string $m2, string $cmp)
+    public function testPriorityComparison(string $m1, string $m2, string $cmp)
     {
         $rm1 = RouteMatcher::compile($m1);
         $rm2 = RouteMatcher::compile($m2);

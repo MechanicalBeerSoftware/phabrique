@@ -9,7 +9,6 @@ use Twig\Loader\FilesystemLoader;
 
 class TwigView implements View
 {
-
     private Environment $twigEnvironment;
     private string $fileName;
 
@@ -25,7 +24,7 @@ class TwigView implements View
     }
 
     public function render(ViewModel $viewModel = null): string
-    { 
+    {
         return $this->twigEnvironment->render($this->name . ".twig.html", ["viewModel" => $viewModel]);
     }
 }

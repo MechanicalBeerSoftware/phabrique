@@ -6,9 +6,8 @@ namespace Phabrique\Core;
 
 use Exception;
 
-
-const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_-][0-9a-zA-Z_-]*)?)+$/";
-const PATH_PATTERN = "/^(\/[0-9a-zA-Z_-]*)+$/";
+const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_][0-9a-zA-Z_]*)?)+(\/\*([a-zA-Z_][a-zA-Z0-9_]+)){0,1}$/";
+const PATH_PATTERN = "/^(\/[0-9a-zA-Z_.-]*)+$/";
 
 class RouteMatcher
 {
@@ -53,7 +52,9 @@ class RouteMatcher
             $pathParts = [];
         }
 
-        if (count($pathParts) != count($this->parts)) {
+        $lastPartIndex = count($this->parts) - 1;
+
+        if (($lastPartIndex > -1 && !str_contains($this->parts[$lastPartIndex][0], '*')) && count($pathParts) != count($this->parts)) {
             return false;
         }
 
@@ -62,6 +63,10 @@ class RouteMatcher
             if ($this->parts[$i][0] == ':') {
                 $key = substr($this->parts[$i], 1);
                 $lastMatch[$key] = $pathParts[$i];
+            } elseif ($this->parts[$i][0] == '*') {
+                $key = substr($this->parts[$i], 1);
+                $lastMatch[$key] = implode("/", array_slice($pathParts, $i));
+                break;
             } else {
                 if ($pathParts[$i] != $this->parts[$i]) {
                     return false;
@@ -90,7 +95,11 @@ class RouteMatcher
                 if ($other->parts[$i][0] != ':') {
                     return false;
                 }
-            } else if ($this->parts[$i] != $other->parts[$i]) {
+            } elseif ($this->parts[$i][0] == '*') {
+                if ($other->parts[$i][0] != '*') {
+                    return false;
+                }
+            } elseif ($this->parts[$i] != $other->parts[$i]) {
                 return false;
             }
         }
