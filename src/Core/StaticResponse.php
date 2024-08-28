@@ -12,11 +12,11 @@ class StaticResponse implements Response
     public function __construct(private string $resourcePath, private HttpStatusCode $statusCode = HttpStatusCode::OK, array $headers = [])
     {
         if (!file_exists($resourcePath)) {
-            throw new HttpError(HttpStatusCode::SERVER_ERROR, "Server Error", "An error occured when reading the file");
+            throw new HttpError(HttpStatusCode::SERVER_ERROR, "An error occured when reading the file");
         }
 
         if (is_dir($resourcePath)) {
-            throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "Bad Request", "No such file");
+            throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "No such file");
         }
 
         $this->headers = [
@@ -27,7 +27,7 @@ class StaticResponse implements Response
 
         $this->body = file_get_contents($resourcePath);
         if (!$this->body) {
-            throw new HttpError(HttpStatusCode::SERVER_ERROR, "Server Error", "An error occured when reading the file");
+            throw new HttpError(HttpStatusCode::SERVER_ERROR, "An error occured when reading the file");
         }
     }
 
