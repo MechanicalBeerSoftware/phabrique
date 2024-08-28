@@ -6,7 +6,7 @@ namespace Phabrique\Core;
 
 use Exception;
 
-const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_][0-9a-zA-Z_]*)?)*(\/\*([a-zA-Z_][a-zA-Z0-9_]+)){0,1}$/";
+const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_][0-9a-zA-Z_]*)?)*(\/\*([a-zA-Z_][a-zA-Z0-9_]+))?$/";
 const PATH_PATTERN = "/^(\/[0-9a-zA-Z_.-]*)+$/";
 
 class RouteMatcher
@@ -38,7 +38,9 @@ class RouteMatcher
         return new RouteMatcher($parts);
     }
 
-    private function __construct(private array $parts) {}
+    private function __construct(private array $parts)
+    {
+    }
 
     public function matches(string $path): bool
     {
