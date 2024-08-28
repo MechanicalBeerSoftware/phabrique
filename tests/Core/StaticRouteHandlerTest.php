@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Phabrique\Core\HttpError;
+use Phabrique\Core\HttpStatusCode;
 use Phabrique\Core\Request\Request;
 use Phabrique\Core\StaticRouteHandler;
 use PHPUnit\Framework\TestCase;
@@ -63,8 +64,9 @@ final class StaticRouteHandlerTest extends TestCase
         try {
             $staticRouteHandler->handle($requestMock);
             $this->fail("routerMock->direct should have failed");
-        } catch (Exception $err) {
-            $this->assertEquals("Invalid path provided, path '" . $fullPath . "'", $err->getMessage());
+        } catch (HttpError $err) {
+            $this->assertEquals(HttpStatusCode::ERR_NOT_FOUND, $err->getStatusCode());
+            $this->assertEquals("No such file", $err->getMessage());
         }
         rmdir($fullPath);
     }
