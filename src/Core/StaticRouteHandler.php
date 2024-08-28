@@ -13,15 +13,17 @@ class StaticRouteHandler implements RouteHandler
 
     public function __construct(string $rootPath)
     {
-        if (!file_exists($rootPath)) {
+        $fullRootPath = realpath($rootPath);
+
+        if (!$fullRootPath) {
             throw new Exception("The specified root path doesn't exist. Path: '$rootPath'");
         }
 
-        if (!is_dir($rootPath)) {
+        if (!is_dir($fullRootPath)) {
             throw new Exception("The root path must be a directory, file given: '$rootPath'");
         }
 
-        $this->rootPath = $rootPath;
+        $this->rootPath = $fullRootPath;
 
         if (!str_ends_with($this->rootPath, '/')) {
             $this->rootPath .= '/';
@@ -30,9 +32,10 @@ class StaticRouteHandler implements RouteHandler
 
     public function handle(Request $request): Response
     {
-        $absPath = realpath($this->rootPath . $request->getPathParameters()["path"]);
+        $relativePath = $this->rootPath . $request->getPathParameters()["path"];
+        $absPath = realpath($relativePath);
         if (!$absPath || !strstr($absPath, $this->rootPath)) {
-            throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "Bad Request", "Invalid path provided");
+            throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "Bad Request", "Invalid path provided, path '$relativePath'");
         }
         return new StaticResponse($absPath);
     }
