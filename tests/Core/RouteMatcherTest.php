@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Phabrique\Core\Route;
 use Phabrique\Core\RouteMatcher;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -13,6 +12,12 @@ class RouteMatcherTest extends TestCase
     {
         # Turn on error reporting
         error_reporting(E_ALL);
+    }
+
+    public function testRouteMatcherWithDefaultRoute()
+    {
+        $m = RouteMatcher::compile("/");
+        $this->assertTrue($m->matches("/"));
     }
 
     public function testRouteMatcherWithoutParamsMatchesCorrectPath()
@@ -146,7 +151,7 @@ class RouteMatcherTest extends TestCase
     public function testKnowIfNotEquivalentWithWildcard()
     {
         $m1 = RouteMatcher::compile("/items/*path");
-        $m2 = RouteMatcher::compile("/items/new");
+        $m2 = RouteMatcher::compile("/");
         $this->assertFalse($m1->isEquivalentTo($m2));
         $this->assertFalse($m2->isEquivalentTo($m1));
     }

@@ -248,4 +248,30 @@ final class RouterTest extends TestCase
 
         $router->direct($request);
     }
+
+    public function testMatchesRootPathBeforeWildcard()
+    {
+        $response = $this->createMock(Response::class);
+
+        /** @var RouteHandler&MockObject */
+        $handler = $this->createMock(RouteHandler::class);
+        $handler->method("handle")->willReturn($response);
+        $handler->expects($this->once())->method("handle");
+
+        /** @var RouteHandler&MockObject */
+        $badHandler = $this->createMock(RouteHandler::class);
+        $badHandler->method("handle")->willReturn($response);
+        $badHandler->expects($this->never())->method("handle");
+
+        $router = new Router();
+        $router->get("/", $handler);
+        $router->get("/items/*path", $badHandler);
+
+        /** @var Request&MockObject */
+        $request = $this->createMock(Request::class);
+        $request->method("getPath")->willReturn("/");
+        $request->method("getMethod")->willReturn(RequestMethod::Get);
+
+        $router->direct($request);
+    }
 }

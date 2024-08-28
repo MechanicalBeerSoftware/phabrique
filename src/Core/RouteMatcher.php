@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phabrique\Core;
 
 use Exception;
+use PhpParser\Node\Stmt\ElseIf_;
 
 const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_][0-9a-zA-Z_]*)?)*(\/\*([a-zA-Z_][a-zA-Z0-9_]+))?$/";
 const PATH_PATTERN = "/^(\/[0-9a-zA-Z_.-]*)+$/";
@@ -51,14 +52,21 @@ class RouteMatcher
             throw new Exception("Invalid path '$path'");
         }
 
+
         $pathParts = explode("/", substr($path, 1));
         if (count($pathParts) == 1 && strlen($pathParts[0]) == 0) {
             $pathParts = [];
         }
 
-        $lastPartIndex = count($this->parts) - 1;
+        // /data/*path
+        // /data/issou/esso
 
-        if (($lastPartIndex > -1 && !str_contains($this->parts[$lastPartIndex][0], '*')) && count($pathParts) != count($this->parts)) {
+
+        if (
+            (!$this->containsWildcard() && count($pathParts) != count($this->parts)) // No wildcard && Different path lengths
+            ||
+            ($this->containsWildcard() && count($pathParts) == 0) // Wildcard && Path parts of length 0 (For "/" path)
+        ) {
             return false;
         }
 
@@ -113,5 +121,12 @@ class RouteMatcher
     public static function comparePriority(RouteMatcher $a, RouteMatcher $b): int
     {
         return strcmp(join("/", $a->parts), join("/", $b->parts));
+    }
+
+    public function containsWildcard(): bool
+    {
+        $lastPartIndex = count($this->parts) - 1;
+
+        return $lastPartIndex > -1 && str_contains($this->parts[$lastPartIndex][0], '*');
     }
 }
