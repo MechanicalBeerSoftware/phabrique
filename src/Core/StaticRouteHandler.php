@@ -35,7 +35,7 @@ class StaticRouteHandler implements RouteHandler
         $relativePath = $this->rootPath . $request->getPathParameters()["path"];
         $absPath = realpath($relativePath);
         if (!$absPath || !strstr($absPath, $this->rootPath)) {
-            throw new HttpError(HttpStatusCode::ERR_NOT_FOUND, "No such file");
+            throw new HttpError(HttpStatusCode::ERR_NOT_FOUND, "The resource you were looking for could not be found");
         }
         return new StaticResponse($absPath);
     }

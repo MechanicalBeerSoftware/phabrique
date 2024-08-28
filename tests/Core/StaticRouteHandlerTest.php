@@ -66,7 +66,7 @@ final class StaticRouteHandlerTest extends TestCase
             $this->fail("routerMock->direct should have failed");
         } catch (HttpError $err) {
             $this->assertEquals(HttpStatusCode::ERR_NOT_FOUND, $err->getStatusCode());
-            $this->assertEquals("No such file", $err->getMessage());
+            $this->assertEquals("The resource you were looking for could not be found", $err->getMessage());
         }
         rmdir($fullPath);
     }
