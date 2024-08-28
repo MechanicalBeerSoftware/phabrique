@@ -6,7 +6,7 @@ namespace Phabrique\Core;
 
 use Exception;
 
-const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_][0-9a-zA-Z_]*)?)+(\/\*([a-zA-Z_][a-zA-Z0-9_]+)){0,1}$/";
+const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_][0-9a-zA-Z_]*)?)*(\/\*([a-zA-Z_][a-zA-Z0-9_]+)){0,1}$/";
 const PATH_PATTERN = "/^(\/[0-9a-zA-Z_.-]*)+$/";
 
 class RouteMatcher
@@ -24,10 +24,12 @@ class RouteMatcher
         }
 
         // Assert no multiple keys
+        $duplicates = [];
         foreach ($parts as $part) {
-            if ($part[0] == ':') {
-                if (array_count_values($parts)[$part] > 1) {
-                    $key = substr($part, 1);
+            if ($part[0] == ':' || $part[0] == '*') {
+                $key = substr($part, 1);
+                array_push($duplicates, $key);
+                if (array_count_values($duplicates)[$key] > 1) {
                     throw new Exception("Duplicate key '$key'");
                 }
             }

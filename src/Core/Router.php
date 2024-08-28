@@ -47,6 +47,11 @@ class Router
         $this->addRoute(RequestMethod::Post, $path, $handler);
     }
 
+    public function static(string $path, string $rootDir)
+    {
+        $this->get($path, new StaticRouteHandler($rootDir));
+    }
+
     public function direct(Request $request): Response
     {
         $pathFound = false;

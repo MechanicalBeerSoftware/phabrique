@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Phabrique\Core\Route;
 use Phabrique\Core\RouteMatcher;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -172,6 +173,13 @@ class RouteMatcherTest extends TestCase
         $this->assertEquals(["id" => "1", "path" => "img/myimage.png"], $m->extract());
     }
 
+    public function testMatcherAcceptsTemplateWithWildcardOnly()
+    {
+        $m = RouteMatcher::compile("/*path");
+        $m->matches("/foo/bar/baz");
+        $this->assertEquals(["path" => "foo/bar/baz"], $m->extract());
+    }
+
     public function testStaticRouteWithMultipleWildcardsIsInvalid()
     {
         $template = "/data/*foo/bar/*baz";
@@ -180,6 +188,18 @@ class RouteMatcherTest extends TestCase
             $this->fail("RouteMatcher::compile was suppose to throw");
         } catch (Exception $err) {
             $this->assertEquals("Invalid template '$template'", $err->getMessage());
+        }
+    }
+
+    public function testTemplateCannotContainDuplicateVariableBetweenPathParamAndWildcard()
+    {
+        $template = "/data/:path/*path";
+
+        try {
+            $m = RouteMatcher::compile($template);
+            $this->fail("RouteMatcher::compile was suppose to throw");
+        } catch (Exception $err) {
+            $this->assertEquals("Duplicate key 'path'", $err->getMessage());
         }
     }
 

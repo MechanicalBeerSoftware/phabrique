@@ -38,6 +38,22 @@ final class RouterTest extends TestCase
         $router->direct($requestMock);
     }
 
+    public function testStaticEndpointBoundToGetMethod(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        /** @var Request&MockObject */
+        $requestMock = $this->createMock(Request::class);
+        $requestMock->method("getPath")->willReturn("/" . basename(__FILE__));
+        $requestMock->method("getMethod")->willReturn(RequestMethod::Get);
+        $requestMock->method("getPathParameters")->willReturn(["path" => basename(__FILE__)]);
+
+        $router = new Router();
+
+        $router->static("/*path", __DIR__);
+        $router->direct($requestMock);
+    }
+
     public function testHandlerCalledWithPostMethod(): void
     {
         /** @var Request&MockObject */
