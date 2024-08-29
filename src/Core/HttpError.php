@@ -8,8 +8,7 @@ use Exception;
 
 class HttpError extends Exception
 {
-
-    public function __construct(private HttpStatusCode $statusCode, private string $statusText, string $message)
+    public function __construct(private HttpStatusCode $statusCode, string $message)
     {
         parent::__construct($message);
     }
@@ -21,6 +20,6 @@ class HttpError extends Exception
 
     public function getStatusText()
     {
-        return $this->statusText;
+        return $this->statusCode->getStatusText();
     }
 }

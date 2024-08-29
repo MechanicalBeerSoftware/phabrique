@@ -47,6 +47,14 @@ class Router
         $this->addRoute(RequestMethod::Post, $path, $handler);
     }
 
+    public function static(string $path, string $rootDir)
+    {
+        if (!str_ends_with($path, '/*path')) {
+            throw new InvalidPathException("The path to a static resource should end with '/*path'. Given '$path'");
+        }
+        $this->get($path, new StaticRouteHandler($rootDir));
+    }
+
     public function direct(Request $request): Response
     {
         $pathFound = false;
@@ -67,9 +75,9 @@ class Router
 
         if ($pathFound) {
             $method = $request->getMethod()->name;
-            throw new HttpError(HttpStatusCode::ERR_METHOD_NOT_ALLOWED, "Method not allowed", "The resource you are trying to access does not support method '$method'");
+            throw new HttpError(HttpStatusCode::ERR_METHOD_NOT_ALLOWED, "The resource you are trying to access does not support method '$method'");
         } else {
-            throw new HttpError(HttpStatusCode::ERR_NOT_FOUND, "Not Found", "The page you were looking for could not be found");
+            throw new HttpError(HttpStatusCode::ERR_NOT_FOUND, "The page you were looking for could not be found");
         }
     }
 }

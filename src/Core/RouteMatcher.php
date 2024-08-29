@@ -6,9 +6,8 @@ namespace Phabrique\Core;
 
 use Exception;
 
-
-const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_-][0-9a-zA-Z_-]*)?)+$/";
-const PATH_PATTERN = "/^(\/[0-9a-zA-Z_-]*)+$/";
+const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_][0-9a-zA-Z_]*)?)*(\/\*([a-zA-Z_][a-zA-Z0-9_]*))?$/";
+const PATH_PATTERN = "/^(\/[0-9a-zA-Z_.-]*)+$/";
 
 class RouteMatcher
 {
@@ -25,10 +24,12 @@ class RouteMatcher
         }
 
         // Assert no multiple keys
+        $duplicates = [];
         foreach ($parts as $part) {
-            if ($part[0] == ':') {
-                if (array_count_values($parts)[$part] > 1) {
-                    $key = substr($part, 1);
+            if ($part[0] == ':' || $part[0] == '*') {
+                $key = substr($part, 1);
+                array_push($duplicates, $key);
+                if (array_count_values($duplicates)[$key] > 1) {
                     throw new Exception("Duplicate key '$key'");
                 }
             }
@@ -37,7 +38,9 @@ class RouteMatcher
         return new RouteMatcher($parts);
     }
 
-    private function __construct(private array $parts) {}
+    private function __construct(private array $parts)
+    {
+    }
 
     public function matches(string $path): bool
     {
@@ -48,12 +51,21 @@ class RouteMatcher
             throw new Exception("Invalid path '$path'");
         }
 
+
         $pathParts = explode("/", substr($path, 1));
         if (count($pathParts) == 1 && strlen($pathParts[0]) == 0) {
             $pathParts = [];
         }
 
-        if (count($pathParts) != count($this->parts)) {
+        // /data/*path
+        // /data/issou/esso
+
+
+        if (
+            (!$this->containsWildcard() && count($pathParts) != count($this->parts)) // No wildcard && Different path lengths
+            ||
+            ($this->containsWildcard() && count($pathParts) == 0) // Wildcard && Path parts of length 0 (For "/" path)
+        ) {
             return false;
         }
 
@@ -62,6 +74,10 @@ class RouteMatcher
             if ($this->parts[$i][0] == ':') {
                 $key = substr($this->parts[$i], 1);
                 $lastMatch[$key] = $pathParts[$i];
+            } elseif ($this->parts[$i][0] == '*') {
+                $key = substr($this->parts[$i], 1);
+                $lastMatch[$key] = implode("/", array_slice($pathParts, $i));
+                break;
             } else {
                 if ($pathParts[$i] != $this->parts[$i]) {
                     return false;
@@ -90,7 +106,11 @@ class RouteMatcher
                 if ($other->parts[$i][0] != ':') {
                     return false;
                 }
-            } else if ($this->parts[$i] != $other->parts[$i]) {
+            } elseif ($this->parts[$i][0] == '*') {
+                if ($other->parts[$i][0] != '*') {
+                    return false;
+                }
+            } elseif ($this->parts[$i] != $other->parts[$i]) {
                 return false;
             }
         }
@@ -100,5 +120,12 @@ class RouteMatcher
     public static function comparePriority(RouteMatcher $a, RouteMatcher $b): int
     {
         return strcmp(join("/", $a->parts), join("/", $b->parts));
+    }
+
+    public function containsWildcard(): bool
+    {
+        $lastPartIndex = count($this->parts) - 1;
+
+        return $lastPartIndex > -1 && str_contains($this->parts[$lastPartIndex][0], '*');
     }
 }

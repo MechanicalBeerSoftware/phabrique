@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Phabrique\Core\HttpError;
 use Phabrique\Core\HttpStatusCode;
+use Phabrique\Core\InvalidPathException;
 use Phabrique\Core\Request\Request;
 use Phabrique\Core\Request\RequestMethod;
 use Phabrique\Core\Response;
@@ -11,11 +12,11 @@ use Phabrique\Core\RouteHandler;
 use Phabrique\Core\Router;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Metadata\Api\Requirements;
 
 final class RouterTest extends TestCase
 {
-
-    function setUp(): void
+    public function setUp(): void
     {
         # Turn on error reporting
         error_reporting(E_ALL);
@@ -35,6 +36,22 @@ final class RouterTest extends TestCase
         $routeHandler->expects($this->once())->method("handle");
 
         $router->get("/", $routeHandler);
+        $router->direct($requestMock);
+    }
+
+    public function testStaticEndpointBoundToGetMethod(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        /** @var Request&MockObject */
+        $requestMock = $this->createMock(Request::class);
+        $requestMock->method("getPath")->willReturn("/" . basename(__FILE__));
+        $requestMock->method("getMethod")->willReturn(RequestMethod::Get);
+        $requestMock->method("getPathParameters")->willReturn(["path" => basename(__FILE__)]);
+
+        $router = new Router();
+
+        $router->static("/*path", __DIR__);
         $router->direct($requestMock);
     }
 
@@ -160,5 +177,114 @@ final class RouterTest extends TestCase
         $request->method("getMethod")->willReturn(RequestMethod::Get);
 
         $router->direct($request);
+    }
+
+    public function testWildcardRouteReturnsResponseForValidPath()
+    {
+
+        $response = $this->createMock(Response::class);
+
+        /** @var RouteHandler&MockObject */
+        $staticHandler = $this->createMock(RouteHandler::class);
+        $staticHandler->expects($this->once())->method("handle")->willReturn($response);
+
+        /** @var Request&MockObject */
+        $request = $this->createMock(Request::class);
+        $request->method("getPath")->willReturn("/data/img/test.png");
+        $request->method("getMethod")->willReturn(RequestMethod::Get);
+
+        $router = new Router();
+        $router->get("/data/*path", $staticHandler);
+        $router->direct($request);
+    }
+
+    public function testWildcardRouteHasLowerPriorityThanPathParams()
+    {
+        $response = $this->createMock(Response::class);
+
+        /** @var RouteHandler&MockObject */
+        $handler = $this->createMock(RouteHandler::class);
+        $handler->method("handle")->willReturn($response);
+        $handler->expects($this->once())->method("handle");
+
+        /** @var RouteHandler&MockObject */
+        $badHandler = $this->createMock(RouteHandler::class);
+        $badHandler->method("handle")->willReturn($response);
+        $badHandler->expects($this->never())->method("handle");
+
+        $router = new Router();
+        $router->get("/items/:id", $handler);
+        $router->get("/items/*path", $badHandler);
+
+        /** @var Request&MockObject */
+        $request = $this->createMock(Request::class);
+        $request->method("getPath")->willReturn("/items/1");
+        $request->method("getMethod")->willReturn(RequestMethod::Get);
+
+        $router->direct($request);
+    }
+
+    public function testWildcardRouteHasLowerPriorityThanSimpleRoute()
+    {
+        $response = $this->createMock(Response::class);
+
+        /** @var RouteHandler&MockObject */
+        $handler = $this->createMock(RouteHandler::class);
+        $handler->method("handle")->willReturn($response);
+        $handler->expects($this->once())->method("handle");
+
+        /** @var RouteHandler&MockObject */
+        $badHandler = $this->createMock(RouteHandler::class);
+        $badHandler->method("handle")->willReturn($response);
+        $badHandler->expects($this->never())->method("handle");
+
+        $router = new Router();
+        $router->get("/items/first", $handler);
+        $router->get("/items/*path", $badHandler);
+
+        /** @var Request&MockObject */
+        $request = $this->createMock(Request::class);
+        $request->method("getPath")->willReturn("/items/first");
+        $request->method("getMethod")->willReturn(RequestMethod::Get);
+
+        $router->direct($request);
+    }
+
+    public function testMatchesRootPathBeforeWildcard()
+    {
+        $response = $this->createMock(Response::class);
+
+        /** @var RouteHandler&MockObject */
+        $handler = $this->createMock(RouteHandler::class);
+        $handler->method("handle")->willReturn($response);
+        $handler->expects($this->once())->method("handle");
+
+        /** @var RouteHandler&MockObject */
+        $badHandler = $this->createMock(RouteHandler::class);
+        $badHandler->method("handle")->willReturn($response);
+        $badHandler->expects($this->never())->method("handle");
+
+        $router = new Router();
+        $router->get("/", $handler);
+        $router->get("/items/*path", $badHandler);
+
+        /** @var Request&MockObject */
+        $request = $this->createMock(Request::class);
+        $request->method("getPath")->willReturn("/");
+        $request->method("getMethod")->willReturn(RequestMethod::Get);
+
+        $router->direct($request);
+    }
+
+    public function testInvalidStaticRouteDeclaration()
+    {
+
+        $router = new Router();
+
+        try {
+            $router->static("/foo/bar", "/");
+        } catch (InvalidPathException $err) {
+            $this->assertEquals("The path to a static resource should end with '/*path'. Given '/foo/bar'", $err->getMessage());
+        }
     }
 }
