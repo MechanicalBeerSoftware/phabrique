@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Phabrique\Core\HttpError;
 use Phabrique\Core\HttpStatusCode;
+use Phabrique\Core\InvalidPathException;
 use Phabrique\Core\Request\Request;
 use Phabrique\Core\Request\RequestMethod;
 use Phabrique\Core\Response;
@@ -273,5 +274,17 @@ final class RouterTest extends TestCase
         $request->method("getMethod")->willReturn(RequestMethod::Get);
 
         $router->direct($request);
+    }
+
+    public function testInvalidStaticRouteDeclaration()
+    {
+
+        $router = new Router();
+
+        try {
+            $router->static("/foo/bar", "/");
+        } catch (InvalidPathException $err) {
+            $this->assertEquals("The path to a static resource should end with '/*path'. Given '/foo/bar'", $err->getMessage());
+        }
     }
 }

@@ -49,6 +49,9 @@ class Router
 
     public function static(string $path, string $rootDir)
     {
+        if (!str_ends_with($path, '/*path')) {
+            throw new InvalidPathException("The path to a static resource should end with '/*path'. Given '$path'");
+        }
         $this->get($path, new StaticRouteHandler($rootDir));
     }
 

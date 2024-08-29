@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Phabrique\Core;
 
 use Exception;
-use PhpParser\Node\Stmt\ElseIf_;
 
-const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_][0-9a-zA-Z_]*)?)*(\/\*([a-zA-Z_][a-zA-Z0-9_]+))?$/";
+const TEMPLATE_PATTERN = "/^(\/:?([a-zA-Z_][0-9a-zA-Z_]*)?)*(\/\*([a-zA-Z_][a-zA-Z0-9_]*))?$/";
 const PATH_PATTERN = "/^(\/[0-9a-zA-Z_.-]*)+$/";
 
 class RouteMatcher

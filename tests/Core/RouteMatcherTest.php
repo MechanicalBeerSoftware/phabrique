@@ -163,6 +163,14 @@ class RouteMatcherTest extends TestCase
         $this->assertEquals(["path" => "myimage.png"], $m->extract());
     }
 
+    public function testMatcherRetrievesOneLetterWildcard()
+    {
+
+        $m = RouteMatcher::compile("/data/*p");
+        $m->matches("/data/myimage.png");
+        $this->assertEquals(["p" => "myimage.png"], $m->extract());
+    }
+
     public function testWildCardRetrievesAllTheRemainingPath()
     {
         $m = RouteMatcher::compile("/data/*path");

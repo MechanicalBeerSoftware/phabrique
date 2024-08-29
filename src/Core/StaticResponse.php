@@ -12,11 +12,11 @@ class StaticResponse implements Response
     public function __construct(private string $resourcePath, private HttpStatusCode $statusCode = HttpStatusCode::OK, array $headers = [])
     {
         if (!file_exists($resourcePath)) {
-            throw new HttpError(HttpStatusCode::SERVER_ERROR, "An error occured when reading the file");
+            throw new HttpError(HttpStatusCode::ERR_NOT_FOUND, "No such file");
         }
 
         if (is_dir($resourcePath)) {
-            throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "No such file");
+            throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "Requested file is a directory");
         }
 
         $this->headers = [

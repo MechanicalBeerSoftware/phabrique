@@ -18,6 +18,7 @@ final class HttpStatusCodeTest extends TestCase
         $this->assertEquals("Forbidden", HttpStatusCode::ERR_FORBIDDEN->getStatusText());
         $this->assertEquals("Not Found", HttpStatusCode::ERR_NOT_FOUND->getStatusText());
         $this->assertEquals("Method Not Allowed", HttpStatusCode::ERR_METHOD_NOT_ALLOWED->getStatusText());
+        $this->assertEquals("Unprocessable Content", HttpStatusCode::ERR_UNPROCESSABLE_CONTENT->getStatusText());
         $this->assertEquals("Internal Server Error", HttpStatusCode::SERVER_ERROR->getStatusText());
     }
 }

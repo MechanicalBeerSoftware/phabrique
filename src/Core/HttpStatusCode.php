@@ -2,8 +2,6 @@
 
 namespace Phabrique\Core;
 
-use Exception;
-
 enum HttpStatusCode: int
 {
     case OK = 200;
@@ -14,6 +12,7 @@ enum HttpStatusCode: int
     case ERR_FORBIDDEN = 403;
     case ERR_NOT_FOUND = 404;
     case ERR_METHOD_NOT_ALLOWED = 405;
+    case ERR_UNPROCESSABLE_CONTENT = 422;
     case SERVER_ERROR = 500;
 
     public function getStatusText(): string
@@ -27,8 +26,8 @@ enum HttpStatusCode: int
             HttpStatusCode::ERR_FORBIDDEN => "Forbidden",
             HttpStatusCode::ERR_NOT_FOUND => "Not Found",
             HttpStatusCode::ERR_METHOD_NOT_ALLOWED => "Method Not Allowed",
+            HttpStatusCode::ERR_UNPROCESSABLE_CONTENT => "Unprocessable Content",
             HttpStatusCode::SERVER_ERROR => "Internal Server Error",
-            default => throw new Exception("This HTTP status code doesn't have a status text")
         };
     }
 }
