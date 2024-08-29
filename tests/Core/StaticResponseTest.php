@@ -61,8 +61,8 @@ final class StaticResponseTest extends TestCase
         try {
             $response = new StaticResponse("./foo.txt");
         } catch (HttpError $err) {
-            $this->assertEquals(HttpStatusCode::SERVER_ERROR, $err->getStatusCode());
-            $this->assertEquals("An error occured when reading the file", $err->getMessage());
+            $this->assertEquals(HttpStatusCode::ERR_NOT_FOUND, $err->getStatusCode());
+            $this->assertEquals("No such file", $err->getMessage());
         }
     }
 
@@ -76,7 +76,7 @@ final class StaticResponseTest extends TestCase
             $response = new StaticResponse("tmp/");
         } catch (HttpError $err) {
             $this->assertEquals(HttpStatusCode::ERR_BAD_REQUEST, $err->getStatusCode());
-            $this->assertEquals("No such file", $err->getMessage());
+            $this->assertEquals("Requested file is a directory", $err->getMessage());
         }
 
         rmdir("tmp/");
