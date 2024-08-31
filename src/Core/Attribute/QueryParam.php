@@ -10,6 +10,6 @@ use Attribute;
 class QueryParam
 {
     public function __construct(
-        public readonly string|null $name = null,
+        public readonly ?string $name = null,
     ) {}
 }
