@@ -6,7 +6,7 @@ namespace Phabrique\Core;
 
 use Phabrique\Core\Request\RequestMethod;
 
-class Route
+class RouteDefinition
 {
     public function __construct(
         private readonly RouteMatcher $matcher,
