@@ -36,6 +36,9 @@ class RadixNode
     public function search(string $text): ?RadixNode
     {
         $text = trim($text, "/");
+        if ($text === "") {
+            return $this;
+        }
         $remainder = "";
         $delim = strpos($text, "/");
          
@@ -46,11 +49,7 @@ class RadixNode
 
         foreach($this->children as $child) {
             if ($child->text === $text) {
-                if ($remainder === "") {
-                    return $child;
-                } else {
-                    return $child->search($remainder);
-                }
+                return $child->search($remainder);
             }
         }
         return null;
