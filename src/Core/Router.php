@@ -46,7 +46,7 @@ class Router
 
         $method = $request->getMethod();
         $handler = $route->getRouteHandler($method);
-        if ($handler === null) {
+        if (is_null($handler)) {
             $methodStr = $method->name;
             throw new HttpError(HttpStatusCode::ERR_METHOD_NOT_ALLOWED, "The resource you are trying to access does not support method '$methodStr'");
         }

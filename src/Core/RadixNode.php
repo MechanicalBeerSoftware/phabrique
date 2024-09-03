@@ -40,7 +40,7 @@ class RadixNode
         $fullText = $text;
         $remainder = "";
         $delim = strpos($text, "/");
-        if ($delim !== FALSE) {
+        if ($delim !== false) {
             $remainder = substr($text, $delim);
             $text = substr($text, 0, $delim);
         }
@@ -75,7 +75,7 @@ class RadixNode
         $remainder = "";
         $delim = strpos($text, "/");
 
-        if ($delim !== FALSE) {
+        if ($delim !== false) {
             $remainder = substr($text, $delim);
             $text = substr($text, 0, $delim);
         }
