@@ -24,4 +24,17 @@ class StringUtilsTest extends TestCase
     {
         $this->assertEquals($expected, StringUtils::commonPrefix($s, $s2));
     }
+
+    function testIndent()
+    {
+        $src = 
+"var a = 0;
+var b = 5;
+var c = a + b;";
+        $expected = 
+"  var a = 0;
+  var b = 5;
+  var c = a + b;";
+        $this->assertEquals($expected, StringUtils::indent("  ", $src));
+    }
 }

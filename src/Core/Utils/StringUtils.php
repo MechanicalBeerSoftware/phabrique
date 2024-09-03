@@ -22,4 +22,15 @@ class StringUtils
         }
         return substr($str1, 0, $i);
     }
+    
+
+    /**
+     * @param string $indentation The indentation string
+     * @param string $src The string to be indented
+     * @return string a new string corresponding to $src having each of its lines prepended with $indentation
+     */
+    public static function indent(string $indentation, string $src): string
+    {
+        return implode("\n", array_map(fn($s) => ($indentation . $s), explode("\n", $src)));
+    }
 }
