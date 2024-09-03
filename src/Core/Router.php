@@ -3,38 +3,20 @@
 namespace Phabrique\Core;
 
 use Phabrique\Core\Request\Request;
-use Exception;
 use Phabrique\Core\Request\RequestMethod;
 
 class Router
 {
-    /**
-     * @var RouteDefinition[]
-     */
-    private array $routes = [];
+    private RadixNode $routesTrie;
+
+    public function __construct()
+    {
+        $this->routesTrie = new RadixNode();
+    }
 
     public function addRoute(RequestMethod $method, string $path, RouteHandler $handler)
     {
-        $matcher = RouteMatcher::compile($path);
-        $route = new RouteDefinition(
-            $matcher,
-            $handler,
-            $method
-        );
-
-        // If a similar route already exists, throw
-        foreach ($this->routes as $existing) {
-            if ($existing->getMethod() == $method && $existing->getMatcher()->isEquivalentTo($matcher)) {
-                throw new Exception("Route already exists");
-            }
-        }
-
-        array_push($this->routes, $route);
-
-        // Sort routes by priority descending
-        usort($this->routes, function (RouteDefinition $r1, RouteDefinition $r2) {
-            return -RouteMatcher::comparePriority($r1->getMatcher(), $r2->getMatcher());
-        });
+        $this->routesTrie->insert($path, $method, $handler);
     }
 
     public function get(string $path, RouteHandler $handler)
@@ -57,27 +39,19 @@ class Router
 
     public function direct(Request $request): Response
     {
-        $pathFound = false;
-        foreach ($this->routes as $route) {
-            $m = $route->getMatcher();
-            if (! $m->matches($request->getPath())) {
-                continue;
-            }
-            $pathFound = true;
-
-            if ($route->getMethod() != $request->getMethod()) {
-                continue;
-            }
-
-            $request->setPathParameters($m->extract());
-            return $route->getHandler()->handle($request);
-        }
-
-        if ($pathFound) {
-            $method = $request->getMethod()->name;
-            throw new HttpError(HttpStatusCode::ERR_METHOD_NOT_ALLOWED, "The resource you are trying to access does not support method '$method'");
-        } else {
+        $route = $this->routesTrie->search($request->getPath());
+        if (! $route->hasMatched()) {
             throw new HttpError(HttpStatusCode::ERR_NOT_FOUND, "The page you were looking for could not be found");
         }
+
+        $method = $request->getMethod();
+        $handler = $route->getRouteHandler($method);
+        if (is_null($handler)) {
+            $methodStr = $method->name;
+            throw new HttpError(HttpStatusCode::ERR_METHOD_NOT_ALLOWED, "The resource you are trying to access does not support method '$methodStr'");
+        }
+
+        $request->setPathParameters($route->getPathParams());
+        return $handler->handle($request); 
     }
 }
