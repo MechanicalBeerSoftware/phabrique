@@ -1,0 +1,8 @@
+{
+  "name": "Phabrique-Dev",
+  "remoteUser": "ubuntu",
+  "workspaceFolder": "/workspace",
+  "build": {
+    "dockerfile": "Dockerfile",
+  }
+}
