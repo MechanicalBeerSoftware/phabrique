@@ -41,11 +41,9 @@ class Application
      *
      * @param string $path the endpoint path
      * @param string $directory the directory to bind to the endpoint
-     * @return Application the current application object
      */
-    public function withStatic(string $path, string $directory): Application
+    public function withStatic(string $path, string $directory): void
     {
         $this->router->static($path, $directory);
-        return $this;
     }
 }
