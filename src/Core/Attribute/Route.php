@@ -7,7 +7,7 @@ namespace Phabrique\Core\Attribute;
 use Attribute;
 use Phabrique\Core\Request\RequestMethod;
 
-#[Attribute(Attribute::TARGET_FUNCTION | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Route
 {
     public function __construct(
