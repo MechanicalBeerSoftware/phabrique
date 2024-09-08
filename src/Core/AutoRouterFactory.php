@@ -4,42 +4,63 @@ declare(strict_types=1);
 
 namespace Phabrique\Core;
 
+use Phabrique\Core\Attribute\Controller;
 use Phabrique\Core\Attribute\PathParam;
 use Phabrique\Core\Attribute\QueryParam;
 use Phabrique\Core\Request\Request;
 use Phabrique\Core\Attribute\Route;
-use ReflectionFunction;
+use ReflectionClass;
+use ReflectionMethod;
 
 class AutoRouterFactory implements RouterFactory
 {
     public function buildRouter(): Router
     {
         $router = new Router();
-        $userspaceFunctions = get_defined_functions()["user"];
-        foreach ($userspaceFunctions as $fn) {
-            $this->processFunction($router, $fn);
+        $definedClasses = get_declared_classes();
+        foreach ($definedClasses as $className) {
+            $this->processClass($router, $className);
         }
         return $router;
     }
 
-    private function processFunction(Router $router, callable $fn)
+    private function processClass(Router $router, string $className)
     {
-        $fnRef = new ReflectionFunction($fn);
-        $routeAttributes = $fnRef->getAttributes(Route::class);
-        foreach ($routeAttributes as $routeAttribute) {
-            $routeDescription = $routeAttribute->newInstance();
-            $router->addRoute(
-                $routeDescription->method,
-                $routeDescription->path,
-                $this->buildRouteHandler($fn, $fnRef)
-            );
+        $controllerRef = new ReflectionClass($className);
+        $classAttributes = $controllerRef->getAttributes(Controller::class);
+
+        if (empty($classAttributes)) {
+            return;
+        }
+
+        $classMethods = $controllerRef->getMethods();
+        foreach ($classMethods as $fn) {
+            $this->processFunction($router, $controllerRef, $fn);
         }
     }
 
-    private function buildRouteHandler(callable $fn, ReflectionFunction $fnRef)
-    {   
-        return new class($fn, $fnRef) implements RouteHandler {
-            public function __construct(private readonly mixed $fn, private readonly ReflectionFunction $fnRef) {}
+    private function processFunction(Router $router, ReflectionClass $controllerRef, ReflectionMethod $fnRef)
+    {
+        $routeAttributes = $fnRef->getAttributes(Route::class);
+        $controllerName = $controllerRef->getName();
+        $controllerAttributes = $controllerRef->getAttributes(Controller::class);
+        foreach ($controllerAttributes as $controllerAttribute) {
+            $controllerDescription = $controllerAttribute->newInstance();
+            foreach ($routeAttributes as $routeAttribute) {
+                $routeDescription = $routeAttribute->newInstance();
+                $router->addRoute(
+                    $routeDescription->method,
+                    $controllerDescription->prefix . $routeDescription->path,
+                    $this->buildRouteHandler(new $controllerName(), $fnRef)
+                );
+            }
+        }
+    }
+
+    private function buildRouteHandler(object $controllerInstance, ReflectionMethod $fnRef)
+    {
+        return new class($controllerInstance, $fnRef) implements RouteHandler {
+            public function __construct(private readonly object $controllerInstance, private readonly ReflectionMethod $fnRef) {}
 
             public function handle(Request $request): Response
             {
@@ -47,8 +68,7 @@ class AutoRouterFactory implements RouterFactory
 
                 // Auto-binding logic here
                 $paramRefs = $this->fnRef->getParameters();
-                foreach($paramRefs as $paramRef)
-                {
+                foreach ($paramRefs as $paramRef) {
                     if ($paramRef->getType() == Request::class) {
                         $callParams[$paramRef->getName()] = $request;
                         continue;
@@ -73,10 +93,9 @@ class AutoRouterFactory implements RouterFactory
                         }
                         $callParams[$paramRef->getName()] = $request->getQueryParameters()[$name];
                     }
-
                 }
 
-                return call_user_func_array($this->fn, $callParams);
+                return call_user_func_array([$this->controllerInstance, $this->fnRef->getName()], $callParams);
             }
         };
     }
