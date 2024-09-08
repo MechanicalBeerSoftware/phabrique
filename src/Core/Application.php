@@ -35,4 +35,15 @@ class Application
         }
         echo $response->getBody();
     }
+
+    /**
+     * Adds a static endpoint to the router
+     *
+     * @param string $path the endpoint path
+     * @param string $directory the directory to bind to the endpoint
+     */
+    public function withStatic(string $path, string $directory): void
+    {
+        $this->router->static($path, $directory);
+    }
 }
