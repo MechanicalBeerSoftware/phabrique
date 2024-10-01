@@ -25,7 +25,7 @@ class Application
             $response = $this->errorHandler->handle($request, $err);
         } catch (Exception | Error $err) {
             error_log($err->getMessage());
-            $serverError = new HttpError(HttpStatusCode::SERVER_ERROR, "Internal Server Error", "Something went wrong while processing your request");
+            $serverError = new HttpError(HttpStatusCode::SERR_INTERNAL_SERVER_ERROR, "Internal Server Error", "Something went wrong while processing your request");
             $response = $this->errorHandler->handle($request, $serverError);
         }
 
