@@ -10,6 +10,8 @@ class BodyParserFactory
     {
         return match ($contentType) {
             "application/json" => new JSONBodyParser(),
+            "application/x-www-form-urlencoded" => new FormDataBodyParser(),
+            "multipart/form-data" => new MultipartFormBodyParser(),
             default => null,
         };
     }
