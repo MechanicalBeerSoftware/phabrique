@@ -30,12 +30,12 @@ class MultipartFormBodyParser implements BodyParser
             }
 
             if (array_key_exists("Content-Disposition", $headers)) {
-                $nameMatch = [];
-                preg_match("/name=\"([^\"]+)\"/", $headers["Content-Disposition"], $nameMatch);
+                $fieldNameMatch = [];
+                preg_match("/name=\"([^\"]+)\"/", $headers["Content-Disposition"], $fieldNameMatch);
                 $fileMatch = [];
                 $hasFilename = preg_match("/filename=\"([^\"]+)\"/", $headers["Content-Disposition"], $fileMatch);
 
-                $name = $nameMatch[1];
+                $fieldName = $fieldNameMatch[1];
 
                 if ($hasFilename === 1) {
                     $parsedField = [];
@@ -46,29 +46,28 @@ class MultipartFormBodyParser implements BodyParser
                         $parsedField["type"] = $headers["Content-Type"];
                     }
 
-                    if (array_key_exists($name, $parsedBody)) {
-                        $existingFile = $parsedBody[$name];
+                    if (array_key_exists($fieldName, $parsedBody)) {
+                        $existingFile = $parsedBody[$fieldName];
                         if (is_array($existingFile)) {
-                            $parsedBody[$name] = [$existingFile, $parsedField];
+                            $parsedBody[$fieldName] = [$existingFile, $parsedField];
                         } else {
                             array_push($existingFile, $parsedField);
-                            $parsedBody[$name] = $existingFile;
+                            $parsedBody[$fieldName] = $existingFile;
                         }
                     } else {
-                        $parsedBody[$name] = $parsedField;
+                        $parsedBody[$fieldName] = $parsedField;
                     }
                 } else {
-                    if (str_contains($name, "[") && str_contains($name, "]")) {
+                    if (str_contains($fieldName, "[") && str_contains($fieldName, "]")) {
                         $parsedField = [];
-                        parse_str("$name=$partContent", $parsedField);
+                        parse_str("$fieldName=$partContent", $parsedField);
                         $parsedBody = array_merge_recursive($parsedBody, $parsedField);
                     } else {
-                        $parsedBody[$name] = $partContent;
+                        $parsedBody[$fieldName] = $partContent;
                     }
                 }
             }
         }
-
 
         return $parsedBody;
     }
