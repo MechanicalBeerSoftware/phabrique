@@ -88,10 +88,17 @@ class AutoRouterFactory implements RouterFactory
                     if (count($queryAttributes) > 0) {
                         $queryParam = $queryAttributes[0]->newInstance();
                         $name = $paramRef->getName();
-                        if (! is_null($queryParam->name)) {
+                        if (!is_null($queryParam->name)) {
                             $name = $queryParam->name;
                         }
-                        $callParams[$paramRef->getName()] = $request->getQueryParameters()[$name];
+
+                        $requestQueryParams = $request->getQueryParameters();
+
+                        if (!$paramRef->allowsNull() && !array_key_exists($name, $requestQueryParams)) {
+                            throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "Missing query parameter $name");
+                        }
+
+                        $callParams[$paramRef->getName()] = $request->getQueryParameters()[$name] ?? null;
                     }
                 }
 
