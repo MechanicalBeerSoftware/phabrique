@@ -9,6 +9,7 @@ use Phabrique\Core\Attribute\PathParam;
 use Phabrique\Core\Attribute\QueryParam;
 use Phabrique\Core\Request\Request;
 use Phabrique\Core\Attribute\Route;
+use Phabrique\Core\Request\RequestMethod;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -68,6 +69,7 @@ class AutoRouterFactory implements RouterFactory
 
                 // Auto-binding logic here
                 $paramRefs = $this->fnRef->getParameters();
+                $errors = [];
                 foreach ($paramRefs as $paramRef) {
                     if ($paramRef->getType() == Request::class) {
                         $callParams[$paramRef->getName()] = $request;
@@ -95,14 +97,22 @@ class AutoRouterFactory implements RouterFactory
                         $requestQueryParams = $request->getQueryParameters();
 
                         if (!$paramRef->allowsNull() && !array_key_exists($name, $requestQueryParams)) {
-                            throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "Missing query parameter $name");
+                            $errors[$name] = "Missing query parameter '$name'";
                         }
 
                         $callParams[$paramRef->getName()] = $request->getQueryParameters()[$name] ?? null;
                     }
                 }
 
-                return call_user_func_array([$this->controllerInstance, $this->fnRef->getName()], $callParams);
+                if (empty($errors)) {
+                    return call_user_func_array([$this->controllerInstance, $this->fnRef->getName()], $callParams);
+                }
+
+                if (count($errors) === 1) {
+                    throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, array_values($errors)[0]);
+                }
+
+                throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "Several required query parameters are missing");
             }
         };
     }

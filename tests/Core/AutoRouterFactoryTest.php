@@ -32,6 +32,12 @@ class AutoRouterFactoryTestExampleClass
         }
         return new ServerResponse(HttpStatusCode::OK, [], "Your age is undefined");
     }
+
+    #[Route("/foobarbaz")]
+    public function foobar(#[QueryParam("name")] string $name, #[QueryParam("my-age")] int $age)
+    {
+        return new ServerResponse(HttpStatusCode::OK, [], "Name: $name, Age: $age");
+    }
 }
 
 #[Controller("/prefix")]
@@ -105,7 +111,35 @@ class AutoRouterFactoryTest extends TestCase
             $this->fail("You shouldn't be here");
         } catch (HttpError $err) {
             $this->assertEquals(HttpStatusCode::ERR_BAD_REQUEST, $err->getStatusCode());
-            $this->assertEquals("Missing query parameter my-age", $err->getMessage());
+            $this->assertEquals("Missing query parameter 'my-age'", $err->getMessage());
+        }
+    }
+
+    public function testDirectRequestWithMultipleMissingQueryParameters()
+    {
+        // Note: this kind of behaviour is extremely inconvenient to test
+        // because php lacks the ability to declare local functions. So
+        // if I decide to create my own route function, it will be available
+        // within all other tests.
+
+        $request = new ServerRequest(
+            [],
+            "/foobarbaz",
+            RequestMethod::Get,
+            "",
+            []
+        );
+
+
+        $rf = new AutoRouterFactory();
+        $router = $rf->buildRouter();
+
+        try {
+            $resp = $router->direct($request);
+            $this->fail("You shouldn't be here");
+        } catch (HttpError $err) {
+            $this->assertEquals(HttpStatusCode::ERR_BAD_REQUEST, $err->getStatusCode());
+            $this->assertEquals("Several required query parameters are missing", $err->getMessage());
         }
     }
 
