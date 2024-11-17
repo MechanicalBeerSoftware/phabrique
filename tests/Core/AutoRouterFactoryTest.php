@@ -139,7 +139,7 @@ class AutoRouterFactoryTest extends TestCase
             $this->fail("You shouldn't be here");
         } catch (HttpError $err) {
             $this->assertEquals(HttpStatusCode::ERR_BAD_REQUEST, $err->getStatusCode());
-            $this->assertEquals("Several required query parameters are missing", $err->getMessage());
+            $this->assertEquals("Several required query parameters are missing [name, my-age]", $err->getMessage());
         }
     }
 

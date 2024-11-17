@@ -112,7 +112,8 @@ class AutoRouterFactory implements RouterFactory
                     throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, array_values($errors)[0]);
                 }
 
-                throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "Several required query parameters are missing");
+                $missingParameters = implode(", ", array_keys($errors));
+                throw new HttpError(HttpStatusCode::ERR_BAD_REQUEST, "Several required query parameters are missing [$missingParameters]");
             }
         };
     }
