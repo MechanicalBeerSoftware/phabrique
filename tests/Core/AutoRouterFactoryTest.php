@@ -33,6 +33,18 @@ class AutoRouterFactoryTestExampleClass
         return new ServerResponse(HttpStatusCode::OK, [], "Your age is undefined");
     }
 
+    #[Route("/foobar/default")]
+    public function foobardefault(#[QueryParam()] int $age = 25)
+    {
+        return new ServerResponse(HttpStatusCode::OK, [], "Your age is: $age");
+    }
+
+    #[Route("/foobar/default_opt")]
+    public function foobardefaultopt(#[QueryParam()] ?int $age = 25)
+    {
+        return new ServerResponse(HttpStatusCode::OK, [], "Your age is: $age");
+    }
+
     #[Route("/foobarbaz")]
     public function foobar(#[QueryParam("name")] string $name, #[QueryParam("my-age")] int $age)
     {
@@ -166,6 +178,42 @@ class AutoRouterFactoryTest extends TestCase
         $request = new ServerRequest(
             ["age" => 25],
             "/foobar/baz",
+            RequestMethod::Get,
+            "",
+            []
+        );
+
+        $rf = new AutoRouterFactory();
+        $router = $rf->buildRouter();
+
+        $resp = $router->direct($request);
+        $this->assertEquals(HttpStatusCode::OK, $resp->getStatus());
+        $this->assertEquals("Your age is: 25", $resp->getBody());
+    }
+
+    public function testCreateRouteHandlersForMethodsWithDefaultQueryParameterValue()
+    {
+        $request = new ServerRequest(
+            [],
+            "/foobar/default",
+            RequestMethod::Get,
+            "",
+            []
+        );
+
+        $rf = new AutoRouterFactory();
+        $router = $rf->buildRouter();
+
+        $resp = $router->direct($request);
+        $this->assertEquals(HttpStatusCode::OK, $resp->getStatus());
+        $this->assertEquals("Your age is: 25", $resp->getBody());
+    }
+
+    public function testCreateRouteHandlersForMethodsWithOptionalQueryParametersAndDefaultValue()
+    {
+        $request = new ServerRequest(
+            [],
+            "/foobar/default_opt",
             RequestMethod::Get,
             "",
             []

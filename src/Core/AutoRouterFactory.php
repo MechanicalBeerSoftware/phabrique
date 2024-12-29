@@ -13,6 +13,8 @@ use Phabrique\Core\Request\RequestMethod;
 use ReflectionClass;
 use ReflectionMethod;
 
+use function PHPUnit\Framework\isNull;
+
 class AutoRouterFactory implements RouterFactory
 {
     public function buildRouter(): Router
@@ -96,11 +98,15 @@ class AutoRouterFactory implements RouterFactory
 
                         $requestQueryParams = $request->getQueryParameters();
 
-                        if (!$paramRef->allowsNull() && !array_key_exists($name, $requestQueryParams)) {
+                        if (!$paramRef->allowsNull() && !$paramRef->isOptional() && !array_key_exists($name, $requestQueryParams)) {
                             $errors[$name] = "Missing query parameter '$name'";
                         }
 
-                        $callParams[$paramRef->getName()] = $request->getQueryParameters()[$name] ?? null;
+                        $val = $requestQueryParams[$name] ?? null;
+                        if (isNull($val) && $paramRef->isDefaultValueAvailable()) {
+                            $val = $paramRef->getDefaultValue();
+                        }
+                        $callParams[$paramRef->getName()] = $val;
                     }
                 }
 
