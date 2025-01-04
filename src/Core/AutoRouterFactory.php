@@ -9,11 +9,8 @@ use Phabrique\Core\Attribute\PathParam;
 use Phabrique\Core\Attribute\QueryParam;
 use Phabrique\Core\Request\Request;
 use Phabrique\Core\Attribute\Route;
-use Phabrique\Core\Request\RequestMethod;
 use ReflectionClass;
 use ReflectionMethod;
-
-use function PHPUnit\Framework\isNull;
 
 class AutoRouterFactory implements RouterFactory
 {
@@ -103,7 +100,7 @@ class AutoRouterFactory implements RouterFactory
                         }
 
                         $val = $requestQueryParams[$name] ?? null;
-                        if (isNull($val) && $paramRef->isDefaultValueAvailable()) {
+                        if (is_null($val) && $paramRef->isDefaultValueAvailable()) {
                             $val = $paramRef->getDefaultValue();
                         }
                         $callParams[$paramRef->getName()] = $val;
