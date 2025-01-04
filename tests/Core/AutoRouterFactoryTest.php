@@ -191,6 +191,24 @@ class AutoRouterFactoryTest extends TestCase
         $this->assertEquals("Your age is: 25", $resp->getBody());
     }
 
+    public function testRouteWithDefaultParameterValueHasCorrectValueForParametersWhenReceivedInInput()
+    {
+        $request = new ServerRequest(
+            ["age" => "34"],
+            "/foobar/default_opt",
+            RequestMethod::Get,
+            "",
+            []
+        );
+
+        $rf = new AutoRouterFactory();
+        $router = $rf->buildRouter();
+
+        $resp = $router->direct($request);
+        $this->assertEquals(HttpStatusCode::OK, $resp->getStatus());
+        $this->assertEquals("Your age is: 34", $resp->getBody());
+    }
+
     public function testCreateRouteHandlersForMethodsWithDefaultQueryParameterValue()
     {
         $request = new ServerRequest(
