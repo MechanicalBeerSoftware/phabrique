@@ -57,7 +57,7 @@ class HttpRequestParser implements RequestParser
         // TODO: inject via dep injection
         $bodyParserFactory = new BodyParserFactory();
 
-        $bodyParser = $bodyParserFactory->getParserForContentType($headers["Content-Type"]);
+        $bodyParser = $bodyParserFactory->getParserForContentType(new HttpContentType($headers["Content-Type"]));
 
         $body = file_get_contents('php://input');
 
