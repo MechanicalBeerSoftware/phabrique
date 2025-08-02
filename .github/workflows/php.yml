@@ -2,7 +2,7 @@ name: PHP Composer
 
 on:
   push:
-    branches: ["master"]
+    branches: ["*"]
   pull_request:
     branches: ["master"]
 
@@ -10,9 +10,11 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        php-version: ["8.4"]
     steps:
       - uses: actions/checkout@v4
 
