@@ -12,6 +12,12 @@ class Application
 {
     private Router $router;
 
+    /**
+     * @var callable[] $middlewares
+     */
+    private array $middlewares = [];
+
+
     public function __construct(RouterFactory $routerFactory, private ErrorHandler $errorHandler)
     {
         $this->router = $routerFactory->buildRouter();
@@ -20,7 +26,11 @@ class Application
     public function handleRequest(Request $request): void
     {
         try {
-            $response = $this->router->direct($request);
+            $middleware = $this->middlewares[0];
+            $response = $middleware(
+                $request,
+                fn($request, $next) => $this->router->direct($request)
+            );
         } catch (HttpError $err) {
             $response = $this->errorHandler->handle($request, $err);
         } catch (Exception | Error $err) {
@@ -45,5 +55,11 @@ class Application
     public function withStatic(string $path, string $directory): void
     {
         $this->router->static($path, $directory);
+    }
+
+    public function withMiddleware(callable $middleware): Application
+    {
+        array_push($this->middlewares, $middleware);
+        return $this;
     }
 }
