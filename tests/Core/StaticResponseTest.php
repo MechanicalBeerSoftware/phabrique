@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Phabrique\Core\HttpError;
 use Phabrique\Core\HttpStatusCode;
 use Phabrique\Core\StaticResponse;
@@ -21,6 +22,32 @@ final class StaticResponseTest extends TestCase
         unlink("foo.txt");
     }
 
+    static function textfileProvider() {
+        return [
+            "CSS file" => ["foo.css", "text/css"],
+            "XML file" => ["foo.xml", "application/xml"],
+            "HTML file" => ["foo.html", "text/html"],
+            "JS file" => ["foo.js", "text/javascript"],
+            "JSON file" => ["foo.json", "application/json"]
+        ];
+    }
+
+    #[DataProvider('textfileProvider')]
+    public function testResponseHasProperHeadersForTextFiles(string $filename, string $contentType)
+    {
+        file_put_contents($filename, "bar");
+
+        $headers = [
+            "Content-Type" => $contentType
+        ];
+
+        $response = new StaticResponse($filename);
+
+        $this->assertEquals($headers, $response->getHeaders());
+
+        unlink($filename);
+    }
+
     public function testResponseHasProperOverridenHeaders()
     {
         file_put_contents("foo.png", "bar");
@@ -35,6 +62,7 @@ final class StaticResponseTest extends TestCase
 
         unlink("foo.png");
     }
+
 
     public function testResponseHasAllHeaders()
     {
