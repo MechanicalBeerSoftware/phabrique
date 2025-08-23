@@ -26,15 +26,15 @@ class Application
     public function handleRequest(Request $request): void
     {
         try {
-            $middleware = end($this->middlewares);
-            if ($middleware) {
-                $response = $middleware(
-                    $request,
-                    fn($request, $next) => $this->router->direct($request)
-                );
-            } else {
-                $response = $this->router->direct($request);
+            $next = fn($request) => $this->router->direct($request);
+
+            foreach (array_reverse($this->middlewares) as $middleware) {
+                $next = function ($request) use ($middleware, $next) {
+                    return $middleware($request, $next);
+                };
             }
+
+            $response = $next($request);
         } catch (HttpError $err) {
             $response = $this->errorHandler->handle($request, $err);
         } catch (Exception | Error $err) {

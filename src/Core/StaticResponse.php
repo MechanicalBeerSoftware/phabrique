@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Phabrique\Core;
 
+use finfo;
+
 class StaticResponse implements Response
 {
     private array $headers = [];
@@ -20,14 +22,14 @@ class StaticResponse implements Response
         }
 
         $this->headers = [
-            "Content-Type" => mime_content_type($resourcePath),
+            "Content-Type" => $this->getMimeType($resourcePath),
         ];
 
         $this->headers = array_merge($this->headers, $headers);
 
         $this->body = file_get_contents($resourcePath);
         if (!$this->body) {
-            throw new HttpError(HttpStatusCode::SERVER_ERROR, "An error occured when reading the file");
+            throw new HttpError(HttpStatusCode::SERR_INTERNAL_SERVER_ERROR, "An error occured when reading the file");
         }
     }
 
@@ -45,4 +47,31 @@ class StaticResponse implements Response
     {
         return $this->headers;
     }
+
+    function getMimeType(string $filePath): string
+    {
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($filePath);
+
+        // Fallback mapping for common web files
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $map = $this->generateMimeTypesMap();
+
+        return $map[$ext] ?? $mime;
+    }
+
+    function generateMimeTypesMap(): array | bool
+    {
+        $mimeFilePath = __DIR__ . "/../../data/mime.types";
+        $s = [];
+        foreach (explode("\n", file_get_contents($mimeFilePath)) as $x) {
+            if (isset($x[0]) && $x[0] !== '#' && preg_match_all('#([^\s]+)#', $x, $out) && isset($out[1]) && ($c = count($out[1])) > 1) {
+                for ($i = 1; $i < $c; $i++) {
+                    $s[$out[1][$i]] = $out[1][0];
+                }
+            }
+        }
+        return $s;
+    }
+
 }
