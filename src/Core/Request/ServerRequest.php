@@ -14,6 +14,7 @@ class ServerRequest implements Request
         private readonly RequestMethod $method,
         private readonly string|array $body,
         private readonly array $headers,
+        private readonly array $cookies
     ) {}
 
 
@@ -50,5 +51,9 @@ class ServerRequest implements Request
     public function getBody(): array|string
     {
         return $this->body;
+    }
+
+    public function getCookies(): array {
+        return $this->cookies;
     }
 }

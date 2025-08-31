@@ -11,6 +11,10 @@ class JSONResponse implements Response
     private JSONSerializer $serializer;
     private array $headers;
 
+    /* @var Cookie[] $cookies */
+    private array $cookies = [];
+
+
     function __construct(
         private mixed $content,
         private HttpStatusCode $statusCode = HttpStatusCode::OK,
@@ -38,5 +42,19 @@ class JSONResponse implements Response
     function getBody(): mixed
     {
         return $this->serializer->serialize($this->content);
+    }
+
+    public function getCookies(): array
+    {
+        return $this->cookies;
+    }
+
+    public function setCookie(Cookie $cookie): void {
+        $this->cookies[] = $cookie;
+    }
+
+    public function send(): void
+    {
+        echo $this->body;
     }
 }

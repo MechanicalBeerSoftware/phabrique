@@ -87,6 +87,7 @@ class AutoRouterFactoryTest extends TestCase
             "/foobar/123",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 
@@ -111,6 +112,7 @@ class AutoRouterFactoryTest extends TestCase
             "/foobar/123",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 
@@ -139,6 +141,7 @@ class AutoRouterFactoryTest extends TestCase
             "/foobarbaz",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 
@@ -162,6 +165,7 @@ class AutoRouterFactoryTest extends TestCase
             "/foobar/baz",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 
@@ -180,6 +184,7 @@ class AutoRouterFactoryTest extends TestCase
             "/foobar/baz",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 
@@ -198,6 +203,7 @@ class AutoRouterFactoryTest extends TestCase
             "/foobar/default_opt",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 
@@ -216,6 +222,7 @@ class AutoRouterFactoryTest extends TestCase
             "/foobar/default",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 
@@ -234,6 +241,7 @@ class AutoRouterFactoryTest extends TestCase
             "/foobar/default_opt",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 
@@ -252,6 +260,7 @@ class AutoRouterFactoryTest extends TestCase
             "/prefix/foobar/123",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 
@@ -270,6 +279,7 @@ class AutoRouterFactoryTest extends TestCase
             "/barfoo/123",
             RequestMethod::Get,
             "",
+            [],
             []
         );
 

@@ -47,7 +47,10 @@ class Application
         foreach ($response->getHeaders() as $header => $value) {
             header("$header: $value");
         }
-        echo $response->getBody();
+        foreach($response->getCookies() as $cookie) {
+            $cookie->set();
+        }
+        $response->send();
     }
 
     /**
