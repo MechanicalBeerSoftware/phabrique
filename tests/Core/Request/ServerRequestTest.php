@@ -16,6 +16,7 @@ final class ServerRequestTest extends TestCase
             RequestMethod::Get,
             [],
             [],
+            []
         );
 
         $this->assertEmpty($request->getPathParameters());
@@ -29,6 +30,7 @@ final class ServerRequestTest extends TestCase
             RequestMethod::Get,
             [],
             [],
+            []
         );
 
         $request->setPathParameters(["id" => 69]);

@@ -20,6 +20,7 @@ class HttpRequestParser implements RequestParser
             $method,
             $body,
             $headers,
+            $this->parseCookies()
         );
     }
 
@@ -66,5 +67,9 @@ class HttpRequestParser implements RequestParser
             return $body;
         }
         return $bodyParser->parse($body);
+    }
+
+    private function parseCookies(): array {
+        return $_COOKIE;
     }
 }

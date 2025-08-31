@@ -13,4 +13,8 @@ interface Request
     public function getMethod(): RequestMethod;
     public function getHeaders(): array;
     public function getBody(): array|string;
+    /**
+    * @return Cookie[] the cookies of the request
+    */
+    public function getCookies(): array;
 }

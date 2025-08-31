@@ -11,6 +11,9 @@ class StaticResponse implements Response
     private array $headers = [];
     private string $body;
 
+    /* @var Cookie[] $cookies */
+    private array $cookies = [];
+
     public function __construct(private string $resourcePath, private HttpStatusCode $statusCode = HttpStatusCode::OK, array $headers = [])
     {
         if (!file_exists($resourcePath)) {
@@ -74,4 +77,17 @@ class StaticResponse implements Response
         return $s;
     }
 
+    public function getCookies(): array
+    {
+        return $this->cookies;
+    }
+
+    public function setCookie(Cookie $cookie): void {
+        $this->cookies[] = $cookie;
+    }
+
+    public function send(): void
+    {
+        echo $this->body;
+    }
 }

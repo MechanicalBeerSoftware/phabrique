@@ -40,7 +40,8 @@ class ApplicationTest extends TestCase {
             path: "/test",
             method: RequestMethod::Get,
             body: "",
-            headers: []
+            headers: [],
+            cookies: []
         );
 
         $app->withMiddleware(middleware: function (Request $request, callable $next) use ($mockMiddlewareHandler): Response {

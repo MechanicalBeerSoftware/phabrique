@@ -16,6 +16,7 @@ class HttpRequestParserTest extends TestCase
         $_GET = [];
         $_SERVER = [];
         $_POST = [];
+        $_COOKIE = [];
     }
 
     public function testParsedRequestObjectContainsProperUriFromHttpRequest(): void
